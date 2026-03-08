@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LFT ↔ Dallas — Route Planner</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --bg-deep: #08090d;
+  --bg-surface: #0f1118;
+  --bg-card: #161822;
+  --bg-elevated: #1c1f2e;
+  --border-subtle: rgba(255,255,255,0.06);
+  --border-medium: rgba(255,255,255,0.1);
+  --text-primary: #e8eaf0;
+  --text-secondary: #8b90a5;
+  --text-muted: #555970;
+  --accent-emerald: #34d399;
+  --accent-emerald-dim: rgba(52,211,153,0.12);
+  --accent-amber: #fbbf24;
+  --accent-amber-dim: rgba(251,191,36,0.12);
+  --accent-rose: #fb7185;
+  --accent-rose-dim: rgba(251,113,133,0.1);
+  --accent-sky: #38bdf8;
+  --accent-sky-dim: rgba(56,189,248,0.1);
+  --accent-teal: #2dd4bf;
+  --accent-teal-dim: rgba(45,212,191,0.1);
+  --accent-violet: #a78bfa;
+  --accent-violet-dim: rgba(167,139,250,0.1);
+  --accent-gold: #f59e0b;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --radius-xs: 5px;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Grain overlay */
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 9999;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat;
+  background-size: 200px;
+}
+
+/* ─── HEADER ─── */
+.hero {
+  position: relative;
+  padding: 56px 24px 40px;
+  text-align: center;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -120px; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 400px;
+  background: radial-gradient(ellipse, rgba(52,211,153,0.08) 0%, rgba(167,139,250,0.05) 40%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  font-weight: 500;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--accent-emerald);
+  margin-bottom: 14px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 0.1s;
+}
+
+.hero h1 {
+  font-family: var(--font-display);
+  font-size: clamp(1.8rem, 4vw, 2.8rem);
+  font-weight: 900;
+  line-height: 1.15;
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 0.2s;
+}
+
+.hero h1 em {
+  font-style: italic;
+  color: var(--accent-emerald);
+}
+
+.hero-sub {
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  margin-top: 12px;
+  line-height: 1.6;
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 0.35s;
+}
+
+/* ─── LEGEND ─── */
+.legend-bar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  justify-content: center;
+  padding: 0 24px 36px;
+  opacity: 0;
+  animation: fadeUp 0.5s ease forwards 0.45s;
+}
+
+.legend-chip {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 0.7rem; font-weight: 500;
+  color: var(--text-secondary);
+  background: var(--bg-card);
+  border: 1px solid var(--border-subtle);
+  border-radius: 20px;
+  padding: 5px 12px 5px 8px;
+}
+
+.legend-pip {
+  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
+}
+
+.badge-sm {
+  font-family: var(--font-mono);
+  font-size: 0.6rem; font-weight: 700;
+  border-radius: 4px; padding: 2px 6px;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+.badge-veg { background: var(--accent-emerald-dim); color: var(--accent-emerald); }
+.badge-nonveg { background: var(--accent-rose-dim); color: var(--accent-rose); }
+
+/* ─── PLANS GRID ─── */
+.plans-grid {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  padding: 0 20px 48px;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+.plan-col {
+  flex: 0 0 380px;
+  min-width: 340px;
+  display: flex;
+  flex-direction: column;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.plans-grid:hover .plan-col:not(:hover) { opacity: 0.35; transform: scale(0.985); }
+.plan-col:hover { opacity: 1 !important; transform: scale(1) !important; }
+
+/* Plan header ribbon */
+.plan-ribbon {
+  position: relative;
+  padding: 18px 20px;
+  border-radius: var(--radius) var(--radius) 0 0;
+  overflow: hidden;
+}
+
+.plan-ribbon::before {
+  content: '';
+  position: absolute; inset: 0;
+  opacity: 0.15;
+  background-size: 30px 30px;
+}
+
+.plan-ribbon.ribbon-a {
+  background: linear-gradient(135deg, #0c2d48 0%, #0f3d5c 100%);
+  border: 1px solid rgba(56,189,248,0.2);
+  border-bottom: none;
+}
+.plan-ribbon.ribbon-a::before {
+  background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, rgba(56,189,248,0.08) 10px, rgba(56,189,248,0.08) 11px);
+}
+
+.plan-ribbon.ribbon-b {
+  background: linear-gradient(135deg, #1a0f33 0%, #2d1657 100%);
+  border: 1px solid rgba(167,139,250,0.2);
+  border-bottom: none;
+}
+.plan-ribbon.ribbon-b::before {
+  background-image: repeating-linear-gradient(-45deg, transparent, transparent 10px, rgba(167,139,250,0.08) 10px, rgba(167,139,250,0.08) 11px);
+}
+
+.plan-ribbon .plan-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.ribbon-a .plan-label { color: var(--accent-sky); }
+.ribbon-b .plan-label { color: var(--accent-violet); }
+
+.plan-ribbon .plan-title {
+  font-family: var(--font-display);
+  font-size: 1.2rem; font-weight: 700;
+  color: var(--text-primary);
+}
+
+.plan-ribbon .plan-route {
+  font-size: 0.72rem; color: var(--text-secondary); margin-top: 3px;
+}
+
+.recommended-tag {
+  position: absolute;
+  top: 14px; right: 14px;
+  font-family: var(--font-mono);
+  font-size: 0.58rem; font-weight: 700;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  background: var(--accent-emerald);
+  color: var(--bg-deep);
+  padding: 4px 10px;
+  border-radius: 4px;
+}
+
+/* Plan body */
+.plan-body {
+  flex: 1;
+  border-radius: 0 0 var(--radius) var(--radius);
+  padding: 4px 0 20px;
+}
+
+.ribbon-a + .plan-body {
+  background: linear-gradient(180deg, #0c2d48 0%, var(--bg-surface) 80px);
+  border: 1px solid rgba(56,189,248,0.12);
+  border-top: none;
+}
+.ribbon-b + .plan-body {
+  background: linear-gradient(180deg, #1a0f33 0%, var(--bg-surface) 80px);
+  border: 1px solid rgba(167,139,250,0.12);
+  border-top: none;
+}
+
+/* ─── DAY SEPARATOR ─── */
+.day-sep {
+  display: flex; align-items: center; gap: 10px;
+  padding: 18px 18px 8px;
+}
+
+.day-sep-line { flex: 1; height: 1px; background: var(--border-medium); }
+
+.day-sep-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--text-muted);
+  white-space: nowrap;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-subtle);
+}
+
+/* ─── NODES ─── */
+.node-stack { padding: 0 14px; }
+
+.node-wrap {
+  position: relative;
+}
+
+.node-card {
+  position: relative;
+  padding: 12px 14px;
+  border-radius: var(--radius-sm);
+  border: 1px solid;
+  margin: 0 4px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  cursor: default;
+}
+
+.node-card:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  z-index: 10;
+}
+
+/* Node variants */
+.node-drive    { background: var(--bg-card); border-color: var(--border-subtle); }
+.node-stop     { background: var(--bg-card); border-color: var(--border-medium); }
+.node-temple-open   { background: var(--accent-emerald-dim); border-color: rgba(52,211,153,0.3); }
+.node-temple-tight  { background: var(--accent-amber-dim); border-color: rgba(251,191,36,0.3); }
+.node-temple-closed { background: var(--accent-rose-dim); border-color: rgba(251,113,133,0.25); }
+.node-temple-fixed  { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.25); }
+.node-meal     { background: var(--accent-teal-dim); border-color: rgba(45,212,191,0.2); }
+.node-hotel    { background: var(--accent-sky-dim); border-color: rgba(56,189,248,0.2); }
+.node-activity { background: var(--accent-violet-dim); border-color: rgba(167,139,250,0.2); }
+.node-home     { background: var(--accent-emerald-dim); border-color: rgba(52,211,153,0.25); }
+
+.node-icon {
+  font-size: 1rem;
+  margin-bottom: 3px;
+}
+
+.node-title {
+  font-family: var(--font-body);
+  font-size: 0.78rem; font-weight: 600;
+  color: var(--text-primary);
+  line-height: 1.35;
+}
+
+.node-time {
+  font-family: var(--font-mono);
+  font-size: 0.65rem; font-weight: 500;
+  color: var(--text-secondary);
+  margin-top: 3px;
+}
+
+.node-sub {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+
+.node-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+
+.badge {
+  font-family: var(--font-mono);
+  font-size: 0.58rem; font-weight: 700;
+  border-radius: var(--radius-xs);
+  padding: 3px 8px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.badge-open     { background: var(--accent-emerald-dim); color: var(--accent-emerald); }
+.badge-tight    { background: var(--accent-amber-dim); color: var(--accent-amber); }
+.badge-closed   { background: var(--accent-rose-dim); color: var(--accent-rose); }
+.badge-warn     { background: var(--accent-amber-dim); color: var(--accent-amber); }
+.badge-fixed    { background: rgba(245,158,11,0.12); color: var(--accent-gold); }
+.badge-diet-veg { background: var(--accent-emerald-dim); color: var(--accent-emerald); }
+.badge-diet-nv  { background: rgba(251,113,133,0.1); color: var(--accent-rose); }
+.badge-info     { background: var(--accent-sky-dim); color: var(--accent-sky); }
+
+/* ─── CONNECTOR ─── */
+.connector {
+  display: flex; flex-direction: column; align-items: center;
+  padding: 3px 0;
+  position: relative;
+}
+
+.conn-stem {
+  width: 1px; height: 14px;
+  background: linear-gradient(180deg, var(--border-medium), var(--text-muted));
+}
+
+.conn-tag {
+  font-family: var(--font-mono);
+  font-size: 0.58rem; font-weight: 500;
+  color: var(--text-muted);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: 10px;
+  padding: 2px 10px;
+  white-space: nowrap;
+}
+
+/* ─── REFERENCE LINE ─── */
+.ref-line {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 18px;
+}
+
+.ref-line-dash {
+  flex: 1; height: 0;
+  border-top: 2px dashed rgba(56,189,248,0.35);
+}
+
+.ref-line-label {
+  font-family: var(--font-mono);
+  font-size: 0.6rem; font-weight: 600;
+  color: var(--accent-sky);
+  white-space: nowrap;
+  letter-spacing: 0.06em;
+}
+
+/* ─── TOOLTIPS ─── */
+.tt { position: relative; }
+
+.tt .tip {
+  display: none;
+  position: absolute;
+  bottom: calc(100% + 10px);
+  left: 50%; transform: translateX(-50%);
+  background: var(--bg-elevated);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 0.72rem;
+  color: var(--text-primary);
+  width: 260px;
+  z-index: 200;
+  line-height: 1.6;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  pointer-events: none;
+}
+
+.tt:hover .tip { display: block; }
+.tip strong { color: #fff; }
+.tip .tip-hours { color: var(--accent-emerald); font-family: var(--font-mono); font-size: 0.66rem; }
+.tip .tip-warn { color: var(--accent-amber); }
+
+/* ─── IMPACT BOX ─── */
+.impact-box {
+  margin: 12px 14px 0;
+  padding: 14px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 0.72rem;
+  line-height: 1.65;
+  border: 1px solid;
+}
+
+.impact-good { background: var(--accent-emerald-dim); border-color: rgba(52,211,153,0.2); color: #a7f3d0; }
+.impact-mixed { background: var(--accent-amber-dim); border-color: rgba(251,191,36,0.2); color: #fde68a; }
+
+.impact-box strong { color: #fff; }
+
+/* ─── COMPARISON TABLE ─── */
+.comparison {
+  max-width: 820px;
+  margin: 0 auto 48px;
+  padding: 0 20px;
+  opacity: 0;
+  animation: fadeUp 0.6s ease forwards 0.6s;
+}
+
+.comparison-inner {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-medium);
+  border-radius: var(--radius);
+  overflow: hidden;
+}
+
+.comparison-header {
+  padding: 20px 24px 16px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.comparison-header h2 {
+  font-family: var(--font-display);
+  font-size: 1.15rem; font-weight: 700;
+  color: var(--text-primary);
+}
+
+.comparison-header p {
+  font-size: 0.75rem; color: var(--text-secondary); margin-top: 4px;
+}
+
+.cmp-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.cmp-table th, .cmp-table td {
+  padding: 10px 16px;
+  text-align: left;
+  font-size: 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.cmp-table th {
+  font-family: var(--font-mono);
+  font-size: 0.6rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase;
+  color: var(--text-muted);
+  background: var(--bg-card);
+}
+
+.cmp-table td:first-child {
+  font-weight: 600; color: var(--text-primary);
+  min-width: 140px;
+}
+
+.cmp-table td:nth-child(2) { color: var(--accent-sky); }
+.cmp-table td:nth-child(3) { color: var(--accent-violet); }
+
+.cmp-table tr:last-child td { border-bottom: none; }
+
+/* Recommendation callout */
+.reco-box {
+  margin: 0;
+  padding: 18px 24px;
+  background: linear-gradient(135deg, rgba(52,211,153,0.06), rgba(167,139,250,0.04));
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: var(--text-secondary);
+}
+
+.reco-box strong { color: var(--accent-emerald); }
+.reco-box .reco-title {
+  font-family: var(--font-display);
+  font-size: 0.95rem; font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+/* ─── ANIMATIONS ─── */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.plan-col {
+  opacity: 0;
+  animation: fadeUp 0.7s ease forwards;
+}
+.plan-col:nth-child(1) { animation-delay: 0.3s; }
+.plan-col:nth-child(2) { animation-delay: 0.5s; }
+
+/* ─── RESPONSIVE ─── */
+@media (max-width: 820px) {
+  .plan-col { flex: 0 0 320px; min-width: 300px; }
+  .hero { padding: 40px 16px 28px; }
+}
+
+@media (max-width: 480px) {
+  .plan-col { flex: 0 0 290px; min-width: 280px; }
+  .cmp-table th, .cmp-table td { padding: 8px 10px; font-size: 0.68rem; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">March 13–15, 2026 · Lafayette → Dallas → Lafayette</div>
+  <h1>Two Routes, <em>One Journey</em></h1>
+  <p class="hero-sub">Compare Houston temple visits on Friday vs. Sunday — hover a column to focus, hover nodes for details</p>
+</div>
+
+<!-- LEGEND -->
+<div class="legend-bar">
+  <div class="legend-chip"><div class="legend-pip" style="background:var(--accent-emerald)"></div> Temple open</div>
+  <div class="legend-chip"><div class="legend-pip" style="background:var(--accent-amber)"></div> Tight window</div>
+  <div class="legend-chip"><div class="legend-pip" style="background:var(--accent-rose)"></div> Closed / missed</div>
+  <div class="legend-chip"><div class="legend-pip" style="background:var(--accent-teal)"></div> Meal</div>
+  <div class="legend-chip"><div class="legend-pip" style="background:var(--accent-violet)"></div> Activity</div>
+  <div class="legend-chip"><div class="legend-pip" style="background:var(--accent-sky)"></div> Hotel</div>
+  <div class="legend-chip"><span class="badge-sm badge-veg">🥬 Veg</span></div>
+  <div class="legend-chip"><span class="badge-sm badge-nonveg">🍗 Non-veg</span></div>
+</div>
+
+<!-- ════════════ PLANS SIDE BY SIDE ════════════ -->
+<div class="plans-grid">
+
+<!-- ═══ PLAN A ═══ -->
+<div class="plan-col">
+  <div class="plan-ribbon ribbon-a">
+    <div class="plan-label">Plan A</div>
+    <div class="plan-title">Houston on Friday</div>
+    <div class="plan-route">I-10 W → temples → I-45 N to Dallas</div>
+  </div>
+  <div class="plan-body">
+
+    <!-- FRI -->
+    <div class="day-sep"><div class="day-sep-line"></div><div class="day-sep-label">Fri · Mar 13</div><div class="day-sep-line"></div></div>
+    <div class="node-stack">
+
+      <div class="tt"><div class="node-card node-drive"><div class="node-icon">🚗</div><div class="node-title">Depart Lafayette</div><div class="node-time">5:00 AM CDT</div><div class="node-sub">Early start — only viable time for Friday temples</div></div><div class="tip"><strong>5:00 AM — only viable departure</strong><br>Pack car night before. Fill gas on the way out. Later departures miss temple morning sessions.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">3h 20m · 220 mi · I-10 W</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-stop"><div class="node-icon">📍</div><div class="node-title">14855 Memorial Dr, Houston</div><div class="node-time">Arrive 8:20 AM · 1h stop</div><div class="node-sub">Rest, stretch, coffee · West Houston off I-10</div></div><div class="tip"><strong>Memorial Dr Stop</strong><br>West Houston, right off I-10. Depart by 9:20 AM to stay on schedule.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">28 min · 18 mi</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-temple-open"><div class="node-icon">🛕</div><div class="node-title">Ashtalakshmi Temple</div><div class="node-time">Arrive 9:48 AM</div><div class="node-sub">10098 Synott Rd, Sugar Land TX</div><div class="node-badges"><span class="badge badge-open">✅ Open · ~2h 12m window</span></div></div><div class="tip"><strong>Ashtalakshmi Temple</strong><br>10098 Synott Rd, Sugar Land TX 77498<br><br><span class="tip-hours">Fri: 8:00 AM – 12:00 PM / 5:30 – 8:30 PM</span><br>Arrive 9:48 AM → 2h 12m before close. Comfortable darshan.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">32 min · 20 mi</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-temple-open"><div class="node-icon">🛕</div><div class="node-title">Meenakshi Temple</div><div class="node-time">Arrive ~11:00 AM</div><div class="node-sub">17130 McLean Rd, Pearland TX</div><div class="node-badges"><span class="badge badge-open">✅ Open · ~2h window</span><span class="badge badge-warn">⚠ Canteen closed</span></div></div><div class="tip"><strong>Meenakshi Temple</strong><br>17130 McLean Rd, Pearland TX 77584<br><br><span class="tip-hours">Fri: 8:30 AM – 1:00 PM / 5:00 – 9:00 PM</span><br>Arrive ~11:00 AM → ~2h window.<br><br><span class="tip-warn">⚠ Canteen CLOSED Friday morning</span> (open Fri evening &amp; weekends). Plan lunch separately.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~15 min</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-meal"><div class="node-icon">🍽️</div><div class="node-title">Lunch — after temples</div><div class="node-time">~12:15 PM</div><div class="node-sub">Indian restaurant near Pearland or drive-through on I-45 N</div><div class="node-badges"><span class="badge badge-diet-nv">🍗 Non-veg OK</span></div></div><div class="tip"><strong>Lunch Options</strong><br>Meenakshi canteen closed Friday AM.<br>Non-veg OK — temple visits done.<br>• Indian restaurants near Pearland/Hwy 288<br>• Drive-through on I-45 N (quicker)</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">3h 50m · 250 mi · I-45 N</div><div class="conn-stem"></div></div>
+
+      <div class="ref-line"><div class="ref-line-dash"></div><div class="ref-line-label">3:00 PM check-in</div><div class="ref-line-dash"></div></div>
+
+      <div class="tt"><div class="node-card node-hotel"><div class="node-icon">🏨</div><div class="node-title">Arrive Aloft Frisco</div><div class="node-time">~4:05 PM · ~1h late</div></div><div class="tip"><strong>Aloft Frisco</strong><br>Check-in 3:00 PM CDT<br>Arrive ~4:05 PM (1h 5m late) — manageable.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~25 min</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-stop"><div class="node-icon">🛒</div><div class="node-title">Pooja Shopping</div><div class="node-time">~4:30 PM</div><div class="node-sub">Patel Brothers / India Bazaar / Desi District</div><div class="node-badges"><span class="badge badge-tight">⚠ Tight but doable</span></div></div><div class="tip"><strong>Pooja Shopping</strong><br>Buy fruits &amp; flowers for Saturday Abhisheka.<br>~4:30 PM start is tight but possible. Stores in Frisco/Plano area.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~2h</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-meal"><div class="node-icon">🍽️</div><div class="node-title">Dinner</div><div class="node-time">6:30 – 7:30 PM</div><div class="node-sub">Indian non-veg restaurant TBD</div><div class="node-badges"><span class="badge badge-diet-nv">🍗 Non-veg OK</span></div></div><div class="tip"><strong>Friday Dinner</strong><br>Non-veg OK — temple visits done for the day.<br>Restaurant TBD in Frisco/Plano area.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">early rest</div><div class="conn-stem"></div></div>
+    </div>
+
+    <!-- SAT -->
+    <div class="day-sep"><div class="day-sep-line"></div><div class="day-sep-label">Sat · Mar 14</div><div class="day-sep-line"></div></div>
+    <div class="node-stack">
+
+      <div class="tt"><div class="node-card node-drive"><div class="node-icon">🚗</div><div class="node-title">Leave Hotel</div><div class="node-time">8:00 AM</div></div><div class="tip"><strong>Saturday Morning</strong><br>Head to Karya Siddhi Hanuman Temple. ~30–45 min drive from Frisco.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~45 min drive</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-temple-fixed"><div class="node-icon">🛕</div><div class="node-title">Karya Siddhi Hanuman Temple</div><div class="node-time">9:00 AM – 12:00 PM</div><div class="node-badges"><span class="badge badge-fixed">⭐ Abhisheka — PRE-BOOKED</span></div><div class="node-sub">Order 9D3C2309 · $31 paid · HARD DEADLINE</div></div><div class="tip"><strong>Abhisheka Pooja</strong><br>Pre-booked &amp; paid ($31). Must be on time at 9:00 AM.<br>Includes darshan. ~3h at temple.<br><br>This is the reason for the entire trip — non-negotiable.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">at temple</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-meal"><div class="node-icon">🍽️</div><div class="node-title">Lunch at Temple</div><div class="node-time">~12:00 PM</div><div class="node-sub">Temple prasadam / canteen</div><div class="node-badges"><span class="badge badge-diet-veg">🥬 Strictly veg</span></div></div><div class="tip"><strong>Saturday Lunch</strong><br>Strictly vegetarian day — eat at temple canteen. Temple prasadam available.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~1h</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-activity"><div class="node-icon">☕</div><div class="node-title">Light Walk / Coffee</div><div class="node-time">1:00 – 2:00 PM</div><div class="node-sub">Frisco Square or Legacy West</div></div><div class="tip"><strong>Afternoon Break</strong><br>Relax before museum visit. Coffee &amp; light walk.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~30 min drive</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-activity"><div class="node-icon">✈️</div><div class="node-title">Frontiers of Flight Museum</div><div class="node-time">2:30 – 4:30 PM</div><div class="node-sub">Love Field, Dallas · Apollo &amp; Space Shuttle artifacts</div></div><div class="tip"><strong>Frontiers of Flight Museum</strong><br>Love Field, Dallas<br>• Apollo &amp; Space Shuttle artifacts<br>• Aerospace engineering history<br>• Aviation pioneers</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~1h</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-meal"><div class="node-icon">🍽️</div><div class="node-title">Dinner</div><div class="node-time">5:30 – 6:30 PM</div><div class="node-sub">Indian vegetarian restaurant TBD</div><div class="node-badges"><span class="badge badge-diet-veg">🥬 Strictly veg</span></div></div><div class="tip"><strong>Saturday Dinner</strong><br>Strictly vegetarian day. Indian veg restaurant in Frisco/Plano area.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">optional evening</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-activity"><div class="node-icon">🌙</div><div class="node-title">Optional: Cavanaugh / Love Field</div><div class="node-time">7:00 – 8:30 PM</div><div class="node-sub">Pack &amp; rest early — very early departure</div></div><div class="tip"><strong>Optional Evening</strong><br>• Cavanaugh Flight Museum (Addison)<br>• Love Field Observation Area<br><br>Pack bags tonight. Very early departure tomorrow.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">rest &amp; pack</div><div class="conn-stem"></div></div>
+    </div>
+
+    <!-- SUN A -->
+    <div class="day-sep"><div class="day-sep-line"></div><div class="day-sep-label">Sun · Mar 15</div><div class="day-sep-line"></div></div>
+    <div class="node-stack">
+
+      <div class="tt"><div class="node-card node-drive"><div class="node-icon">🚗</div><div class="node-title">Depart Dallas</div><div class="node-time">4:30 – 5:00 AM</div><div class="node-sub">Express checkout · coffee/snack to-go · I-20 → I-49</div></div><div class="tip"><strong>Early Departure</strong><br>Direct route back via I-20 → I-49. No Houston detour — temples already done Friday.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~3h · rest stop</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-meal"><div class="node-icon">🍽️</div><div class="node-title">Lunch / Snack en route</div><div class="node-time">~9:00 AM</div><div class="node-sub">Rest stop near Shreveport / East TX</div><div class="node-badges"><span class="badge badge-diet-nv">🍗 Non-veg OK</span></div></div><div class="tip"><strong>En Route Meal</strong><br>No temple visit today → non-veg OK anytime.<br>Stop near Shreveport for fuel + food.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~2.5h</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-home"><div class="node-icon">🏠</div><div class="node-title">Arrive Lafayette</div><div class="node-time">~11:00 AM – 12:00 PM</div><div class="node-sub">Mon 3 PM flight · full evening to rest &amp; repack</div></div><div class="tip"><strong>Home by Noon</strong><br>Arrive ~11 AM – 12 PM. Full evening + night to rest &amp; repack for Monday 3 PM flight.</div></div>
+    </div>
+
+    <div class="impact-box impact-mixed">
+      <strong>Plan A verdict</strong><br>
+      ✅ Both temples visited Friday<br>
+      ✅ Sunday home by noon — max rest<br>
+      ⚠ Requires 5:00 AM Friday departure<br>
+      ⚠ Pooja shopping tight (~4:30 PM)<br>
+      ⚠ Meenakshi canteen closed Friday AM
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ═══ PLAN B ═══ -->
+<div class="plan-col">
+  <div class="plan-ribbon ribbon-b">
+    <div class="plan-label">Plan B</div>
+    <div class="plan-title">Houston on Sunday</div>
+    <div class="plan-route">I-49/I-20 Fri · I-45 S → I-10 E Sun</div>
+    <div class="recommended-tag">★ Recommended</div>
+  </div>
+  <div class="plan-body">
+
+    <!-- FRI B -->
+    <div class="day-sep"><div class="day-sep-line"></div><div class="day-sep-label">Fri · Mar 13</div><div class="day-sep-line"></div></div>
+    <div class="node-stack">
+
+      <div class="tt"><div class="node-card node-drive"><div class="node-icon">🚗</div><div class="node-title">Depart Lafayette</div><div class="node-time">7:00 AM CDT</div><div class="node-sub">Relaxed start · Shreveport route (shorter)</div></div><div class="tip"><strong>7:00 AM — Relaxed departure</strong><br>No temple time pressure. Faster I-49 → I-20 route via Shreveport. ~6.5h to Dallas.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~3h 15m · I-49 N</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-meal"><div class="node-icon">🍽️</div><div class="node-title">Lunch in Shreveport</div><div class="node-time">~10:30 AM</div><div class="node-sub">Indian restaurant or packed pulihora</div><div class="node-badges"><span class="badge badge-diet-nv">🍗 Non-veg OK</span></div></div><div class="tip"><strong>Shreveport Lunch</strong><br>No temple visit Friday → non-veg OK anytime.<br>• Indian restaurant in Shreveport<br>• Or bring homemade pulihora</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~3h · 190 mi · I-20 W</div><div class="conn-stem"></div></div>
+
+      <div class="ref-line"><div class="ref-line-dash"></div><div class="ref-line-label">3:00 PM check-in</div><div class="ref-line-dash"></div></div>
+
+      <div class="tt"><div class="node-card node-hotel"><div class="node-icon">🏨</div><div class="node-title">Arrive Aloft Frisco</div><div class="node-time">~1:30 – 2:00 PM</div><div class="node-badges"><span class="badge badge-open">✅ Early — relaxed check-in</span></div></div><div class="tip"><strong>Aloft Frisco</strong><br>Check-in 3:00 PM · May arrive early (~2 PM).<br>Can request early check-in or store bags &amp; explore. Much more relaxed than Plan A.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">settle in · ~1.5h</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-stop"><div class="node-icon">🛒</div><div class="node-title">Pooja Shopping</div><div class="node-time">3:30 – 4:30 PM</div><div class="node-sub">Patel Brothers / India Bazaar / Desi District</div><div class="node-badges"><span class="badge badge-open">✅ Comfortable window</span></div></div><div class="tip"><strong>Pooja Shopping</strong><br>Buy fruits &amp; flowers for Saturday Abhisheka.<br>Plenty of time — no rush. Stores in Frisco/Plano area.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~2h</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-meal"><div class="node-icon">🍽️</div><div class="node-title">Dinner</div><div class="node-time">6:30 – 7:30 PM</div><div class="node-sub">Indian non-veg restaurant TBD</div><div class="node-badges"><span class="badge badge-diet-nv">🍗 Non-veg OK</span></div></div><div class="tip"><strong>Friday Dinner</strong><br>No temple visit today → non-veg anytime. Restaurant TBD in Frisco/Plano.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">early rest</div><div class="conn-stem"></div></div>
+    </div>
+
+    <!-- SAT B (same) -->
+    <div class="day-sep"><div class="day-sep-line"></div><div class="day-sep-label">Sat · Mar 14</div><div class="day-sep-line"></div></div>
+    <div class="node-stack">
+
+      <div class="tt"><div class="node-card node-drive"><div class="node-icon">🚗</div><div class="node-title">Leave Hotel</div><div class="node-time">8:00 AM</div><div class="node-sub">Well-rested from relaxed Friday</div></div><div class="tip"><strong>Saturday Morning</strong><br>Head to Karya Siddhi Hanuman Temple. Well-rested from relaxed Friday — advantage of Plan B.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~45 min drive</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-temple-fixed"><div class="node-icon">🛕</div><div class="node-title">Karya Siddhi Hanuman Temple</div><div class="node-time">9:00 AM – 12:00 PM</div><div class="node-badges"><span class="badge badge-fixed">⭐ Abhisheka — PRE-BOOKED</span></div><div class="node-sub">Order 9D3C2309 · $31 paid · HARD DEADLINE</div></div><div class="tip"><strong>Abhisheka Pooja</strong><br>Pre-booked &amp; paid ($31). Must be on time at 9:00 AM.<br>Well-rested from relaxed Friday — advantage of Plan B.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">at temple</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-meal"><div class="node-icon">🍽️</div><div class="node-title">Lunch at Temple</div><div class="node-time">~12:00 PM</div><div class="node-sub">Temple prasadam / canteen</div><div class="node-badges"><span class="badge badge-diet-veg">🥬 Strictly veg</span></div></div><div class="tip"><strong>Saturday Lunch</strong><br>Strictly vegetarian day — eat at temple canteen.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~1h</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-activity"><div class="node-icon">☕</div><div class="node-title">Light Walk / Coffee</div><div class="node-time">1:00 – 2:00 PM</div><div class="node-sub">Frisco Square or Legacy West</div></div><div class="tip"><strong>Afternoon Break</strong><br>Relax before museum visit.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~30 min drive</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-activity"><div class="node-icon">✈️</div><div class="node-title">Frontiers of Flight Museum</div><div class="node-time">2:30 – 4:30 PM</div><div class="node-sub">Love Field, Dallas · Apollo &amp; Space Shuttle artifacts</div></div><div class="tip"><strong>Frontiers of Flight Museum</strong><br>Love Field, Dallas<br>• Apollo &amp; Space Shuttle artifacts<br>• Aerospace engineering history</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~1h</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-meal"><div class="node-icon">🍽️</div><div class="node-title">Dinner</div><div class="node-time">5:30 – 6:30 PM</div><div class="node-sub">Indian vegetarian restaurant TBD</div><div class="node-badges"><span class="badge badge-diet-veg">🥬 Strictly veg</span></div></div><div class="tip"><strong>Saturday Dinner</strong><br>Strictly vegetarian day.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">optional evening · pack early</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-activity"><div class="node-icon">🌙</div><div class="node-title">Optional: Cavanaugh / Love Field</div><div class="node-time">7:00 – 8:30 PM</div><div class="node-sub">Pack &amp; rest early — early departure for temples</div></div><div class="tip"><strong>Optional Evening</strong><br>Pack bags tonight. Early departure for Houston temples tomorrow.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">rest &amp; pack</div><div class="conn-stem"></div></div>
+    </div>
+
+    <!-- SUN B -->
+    <div class="day-sep"><div class="day-sep-line"></div><div class="day-sep-label">Sun · Mar 15 — Temple Day</div><div class="day-sep-line"></div></div>
+    <div class="node-stack">
+
+      <div class="tt"><div class="node-card node-drive"><div class="node-icon">🚗</div><div class="node-title">Depart Dallas</div><div class="node-time">5:00 AM</div><div class="node-sub">Express checkout · I-45 S to Houston</div></div><div class="tip"><strong>5:00 AM Departure</strong><br>Express checkout. I-45 S to Houston.<br>Can also depart 5:30–6:00 AM — weekend temple hours are very forgiving.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">3h 50m · 250 mi · I-45 S</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-temple-open"><div class="node-icon">🛕</div><div class="node-title">Meenakshi Temple, Pearland</div><div class="node-time">Arrive ~8:50 AM</div><div class="node-sub">17130 McLean Rd, Pearland TX</div><div class="node-badges"><span class="badge badge-open">✅ Weekend: 8:30 AM – 8:30 PM</span><span class="badge badge-info">Canteen open!</span></div></div><div class="tip"><strong>Meenakshi Temple — WEEKEND</strong><br>17130 McLean Rd, Pearland TX 77584<br><br><span class="tip-hours">Weekend: 8:30 AM – 8:30 PM (continuous!)</span><br>Arrive ~8:50 AM → ALL DAY available. Zero time pressure!<br><br>✅ <strong>Canteen OPEN on weekends</strong> — can eat here!</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">32 min · 20 mi</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-temple-open"><div class="node-icon">🛕</div><div class="node-title">Ashtalakshmi Temple, Sugar Land</div><div class="node-time">Arrive ~10:22 AM</div><div class="node-sub">10098 Synott Rd, Sugar Land TX</div><div class="node-badges"><span class="badge badge-open">✅ Open · 8 AM–2 PM · ~3h 38m</span></div></div><div class="tip"><strong>Ashtalakshmi Temple — WEEKEND</strong><br>10098 Synott Rd, Sugar Land TX 77498<br><br><span class="tip-hours">Weekend: 8:00 AM – 2:00 PM / 4:30 – 8:30 PM</span><br>Arrive ~10:22 AM → ~3h 38m before 2 PM close.<br>✅ Very comfortable window.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">28 min · 18 mi</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-stop"><div class="node-icon">📍</div><div class="node-title">14855 Memorial Dr, Houston</div><div class="node-time">Arrive ~11:50 AM · 1h stop</div><div class="node-sub">Rest, stretch · on I-10 corridor to LFT</div></div><div class="tip"><strong>Memorial Dr Stop</strong><br>West Houston, on I-10 corridor. Rest before final leg to Lafayette. Depart by ~12:50 PM.</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~15 min</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-meal"><div class="node-icon">🍽️</div><div class="node-title">Lunch — after temples</div><div class="node-time">~12:00 – 12:50 PM</div><div class="node-sub">Or already ate at Meenakshi canteen (veg, open weekends!)</div><div class="node-badges"><span class="badge badge-diet-nv">🍗 Non-veg OK</span></div></div><div class="tip"><strong>Sunday Lunch Options</strong><br>Temple visits done → non-veg OK now.<br><br>Option 1: Already ate at Meenakshi canteen (veg)<br>Option 2: Non-veg Indian restaurant near Memorial Dr<br>Option 3: Drive-through on I-10 E</div></div>
+
+      <div class="connector"><div class="conn-stem"></div><div class="conn-tag">3h 20m · 220 mi · I-10 E</div><div class="conn-stem"></div></div>
+
+      <div class="tt"><div class="node-card node-home"><div class="node-icon">🏠</div><div class="node-title">Arrive Lafayette</div><div class="node-time">~4:10 PM</div><div class="node-sub">Mon 3 PM flight · 23h buffer · evening to rest</div></div><div class="tip"><strong>Home by ~4 PM</strong><br>Arrive ~4:10 PM. Full evening to rest, unpack, repack for Monday 3 PM flight.<br>Later than Plan A (~11 AM) but still very comfortable — 23h before flight.</div></div>
+    </div>
+
+    <div class="impact-box impact-good">
+      <strong>Plan B verdict</strong><br>
+      ✅ Both temples — weekend hours, ZERO time pressure<br>
+      ✅ Meenakshi canteen open — lunch solved<br>
+      ✅ Relaxed Friday → better rest for Saturday Abhisheka<br>
+      ✅ Comfortable pooja shopping window<br>
+      ⚠ Arrive LFT ~4 PM not ~11 AM (still 23h before flight)
+    </div>
+
+  </div>
+</div>
+
+</div><!-- /plans-grid -->
+
+<!-- ═══ COMPARISON TABLE ═══ -->
+<div class="comparison">
+  <div class="comparison-inner">
+    <div class="comparison-header">
+      <h2>Side-by-Side Comparison</h2>
+      <p>Every factor that matters for the decision</p>
+    </div>
+    <table class="cmp-table">
+      <thead>
+        <tr><th>Factor</th><th>Plan A · Houston Friday</th><th>Plan B · Houston Sunday</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Friday departure</td><td>5:00 AM (required)</td><td>7:00 AM (relaxed)</td></tr>
+        <tr><td>Temple time pressure</td><td>⚠ Must fit morning sessions</td><td>✅ Weekend hours all day</td></tr>
+        <tr><td>Meenakshi canteen</td><td>❌ Closed Fri morning</td><td>✅ Open weekends</td></tr>
+        <tr><td>Dallas arrival (Fri)</td><td>~4:05 PM (1h late)</td><td>~1:30 PM (early!)</td></tr>
+        <tr><td>Pooja shopping</td><td>⚠ ~4:30 PM (tight)</td><td>✅ 3:30 PM (comfortable)</td></tr>
+        <tr><td>Rest before Abhisheka</td><td>⚠ Tired from 5 AM + 8h</td><td>✅ Well-rested</td></tr>
+        <tr><td>Sunday arrival LFT</td><td>✅ ~11:00 AM</td><td>⚠ ~4:10 PM (23h buffer)</td></tr>
+        <tr><td>Total Houston drive</td><td>~8h 10m</td><td>~8h 10m (same)</td></tr>
+        <tr><td>Friday diet</td><td>🍗 Non-veg after 12:15 PM</td><td>🍗 Non-veg anytime</td></tr>
+        <tr><td>Sunday diet</td><td>🍗 Non-veg anytime</td><td>🍗 Non-veg after ~12 PM</td></tr>
+      </tbody>
+    </table>
+    <div class="reco-box">
+      <div class="reco-title">★ Recommendation: Plan B</div>
+      Weekend temple hours eliminate all time pressure (Meenakshi: continuous 8:30 AM – 8:30 PM). Canteen is open for lunch. Friday is relaxed — arrive Dallas early, comfortable pooja shopping, better rest for the <strong>9 AM Saturday Abhisheka</strong>. Only tradeoff: arrive Lafayette ~4 PM instead of ~11 AM Sunday — still 23 hours before Monday's flight.<br><br>
+      <strong>Ashtalakshmi weekend hours confirmed:</strong> 8:00 AM – 2:00 PM / 4:30 – 8:30 PM <em>(source: ashtalakshmi.org)</em>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
