@@ -1,0 +1,738 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TYS → Houston Road Trip — Itinerary</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --bg-deep: #08090d;
+  --bg-surface: #0f1118;
+  --bg-card: #161822;
+  --bg-elevated: #1c1f2e;
+  --border-subtle: rgba(255,255,255,0.06);
+  --border-medium: rgba(255,255,255,0.1);
+  --text-primary: #e8eaf0;
+  --text-secondary: #8b90a5;
+  --text-muted: #555970;
+  --accent-emerald: #34d399;
+  --accent-emerald-dim: rgba(52,211,153,0.12);
+  --accent-amber: #fbbf24;
+  --accent-amber-dim: rgba(251,191,36,0.12);
+  --accent-rose: #fb7185;
+  --accent-rose-dim: rgba(251,113,133,0.1);
+  --accent-sky: #38bdf8;
+  --accent-sky-dim: rgba(56,189,248,0.1);
+  --accent-teal: #2dd4bf;
+  --accent-teal-dim: rgba(45,212,191,0.1);
+  --accent-violet: #a78bfa;
+  --accent-violet-dim: rgba(167,139,250,0.1);
+  --accent-gold: #f59e0b;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --radius-xs: 5px;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 9999;
+  pointer-events: none; opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat; background-size: 200px;
+}
+
+/* ─── HEADER ─── */
+.hero {
+  position: relative; padding: 48px 24px 32px; text-align: center; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute;
+  top: -120px; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 400px;
+  background: radial-gradient(ellipse, rgba(52,211,153,0.08) 0%, rgba(56,189,248,0.05) 40%, transparent 70%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--accent-emerald); margin-bottom: 14px;
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.1s;
+}
+.hero h1 {
+  font-family: var(--font-display); font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 900; line-height: 1.15; letter-spacing: -0.02em; color: var(--text-primary);
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.2s;
+}
+.hero h1 em { font-style: italic; color: var(--accent-emerald); }
+.hero-sub {
+  font-size: 0.85rem; color: var(--text-secondary); margin-top: 12px; line-height: 1.6;
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.35s;
+}
+
+/* ─── FLIGHT BANNER ─── */
+.reminder-banner {
+  max-width: 600px; margin: 0 auto 32px; padding: 0 20px;
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.4s;
+}
+.reminder-inner {
+  background: linear-gradient(135deg, rgba(56,189,248,0.08), rgba(45,212,191,0.05));
+  border: 1.5px solid rgba(56,189,248,0.25);
+  border-radius: var(--radius); padding: 18px 22px;
+  position: relative; overflow: hidden;
+}
+.reminder-inner::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+  background: var(--accent-sky);
+}
+.reminder-tag {
+  font-family: var(--font-mono); font-size: 0.6rem; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--accent-sky); margin-bottom: 8px;
+}
+.reminder-title {
+  font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+  color: var(--text-primary); margin-bottom: 6px;
+}
+.reminder-body {
+  font-size: 0.78rem; color: var(--text-secondary); line-height: 1.7;
+}
+.reminder-body strong { color: var(--accent-sky); }
+.reminder-times {
+  display: flex; gap: 8px; flex-wrap: wrap; margin: 8px 0;
+}
+.reminder-chip {
+  font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600;
+  background: var(--accent-sky-dim); color: var(--accent-sky);
+  border: 1px solid rgba(56,189,248,0.2);
+  padding: 4px 12px; border-radius: 20px;
+}
+.flight-divider {
+  height: 1px; background: rgba(56,189,248,0.15); margin: 12px 0;
+}
+
+/* ─── LEGEND ─── */
+.legend-bar {
+  display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;
+  padding: 0 24px 28px;
+  opacity: 0; animation: fadeUp 0.5s ease forwards 0.45s;
+}
+.legend-chip {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 0.68rem; font-weight: 500; color: var(--text-secondary);
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: 20px; padding: 4px 10px 4px 7px;
+}
+.legend-pip { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.badge-sm {
+  font-family: var(--font-mono); font-size: 0.58rem; font-weight: 700;
+  border-radius: 4px; padding: 2px 6px; text-transform: uppercase; letter-spacing: 0.05em;
+}
+.badge-sm.bv { background: var(--accent-emerald-dim); color: var(--accent-emerald); }
+
+/* ─── TIMELINE CONTAINER ─── */
+.timeline-wrap {
+  max-width: 520px; margin: 0 auto; padding: 0 16px 48px;
+}
+
+/* Day separator */
+.day-sep {
+  display: flex; align-items: center; gap: 10px;
+  padding: 20px 0 10px;
+}
+.day-sep-line { flex: 1; height: 1px; background: var(--border-medium); }
+.day-sep-label {
+  font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);
+  white-space: nowrap; padding: 5px 14px; border-radius: 4px;
+  background: var(--bg-elevated); border: 1px solid var(--border-subtle);
+}
+
+/* Nodes */
+.node-card {
+  position: relative; padding: 14px 16px; border-radius: var(--radius-sm);
+  border: 1px solid; transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: default;
+}
+.node-card:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 10;
+}
+.node-drive    { background: var(--bg-card); border-color: var(--border-subtle); }
+.node-stop     { background: var(--bg-card); border-color: var(--border-medium); }
+.node-meal     { background: var(--accent-teal-dim); border-color: rgba(45,212,191,0.2); }
+.node-hotel    { background: var(--accent-sky-dim); border-color: rgba(56,189,248,0.2); }
+.node-activity { background: var(--accent-violet-dim); border-color: rgba(167,139,250,0.2); }
+.node-home     { background: var(--accent-emerald-dim); border-color: rgba(52,211,153,0.25); }
+.node-reminder {
+  background: linear-gradient(135deg, rgba(251,191,36,0.06), rgba(245,158,11,0.04));
+  border-color: rgba(251,191,36,0.25);
+  border-style: dashed;
+}
+.node-optional {
+  background: linear-gradient(135deg, rgba(251,191,36,0.06), rgba(245,158,11,0.04));
+  border-color: rgba(251,191,36,0.25);
+}
+
+.node-icon { font-size: 1rem; margin-bottom: 3px; }
+.node-title { font-size: 0.82rem; font-weight: 600; color: var(--text-primary); line-height: 1.35; }
+.node-time { font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500; color: var(--text-secondary); margin-top: 3px; }
+.node-sub { font-size: 0.68rem; color: var(--text-muted); margin-top: 4px; line-height: 1.5; }
+.node-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.badge {
+  font-family: var(--font-mono); font-size: 0.58rem; font-weight: 700;
+  border-radius: var(--radius-xs); padding: 3px 8px;
+  letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;
+}
+.badge-open     { background: var(--accent-emerald-dim); color: var(--accent-emerald); }
+.badge-warn     { background: var(--accent-amber-dim); color: var(--accent-amber); }
+.badge-diet-veg { background: var(--accent-emerald-dim); color: var(--accent-emerald); }
+.badge-info     { background: var(--accent-sky-dim); color: var(--accent-sky); }
+.badge-rec      { background: rgba(167,139,250,0.15); color: var(--accent-violet); }
+.badge-work     { background: rgba(251,191,36,0.12); color: var(--accent-amber); }
+
+.node-link {
+  display: inline-block; margin-top: 6px;
+  font-family: var(--font-mono); font-size: 0.66rem; font-weight: 600;
+  color: var(--accent-sky); text-decoration: none;
+  border-bottom: 1px dashed rgba(56,189,248,0.4);
+  transition: color 0.2s;
+}
+.node-link:hover { color: #7dd3fc; }
+
+/* Connector */
+.connector {
+  display: flex; flex-direction: column; align-items: center; padding: 3px 0;
+}
+.conn-stem {
+  width: 1px; height: 14px;
+  background: linear-gradient(180deg, var(--border-medium), var(--text-muted));
+}
+.conn-tag {
+  font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500;
+  color: var(--text-muted); background: var(--bg-surface);
+  border: 1px solid var(--border-subtle); border-radius: 10px;
+  padding: 2px 10px; white-space: nowrap;
+}
+
+/* Reference line */
+.ref-line { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+.ref-line-dash { flex: 1; height: 0; border-top: 2px dashed rgba(56,189,248,0.35); }
+.ref-line-label {
+  font-family: var(--font-mono); font-size: 0.62rem; font-weight: 600;
+  color: var(--accent-sky); white-space: nowrap; letter-spacing: 0.06em;
+}
+
+/* Tooltip */
+.tt { position: relative; }
+.tt .tip {
+  display: none; position: absolute; bottom: calc(100% + 10px);
+  left: 50%; transform: translateX(-50%);
+  background: var(--bg-elevated); border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  font-size: 0.72rem; color: var(--text-primary); width: 280px;
+  z-index: 200; line-height: 1.6; box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  pointer-events: none;
+}
+.tt:hover .tip { display: block; }
+.tip strong { color: #fff; }
+.tip .tip-hours { color: var(--accent-emerald); font-family: var(--font-mono); font-size: 0.66rem; }
+.tip .tip-warn { color: var(--accent-amber); }
+.tip .tip-alt { color: var(--text-secondary); font-size: 0.68rem; }
+.tip .tip-strike { text-decoration: line-through; color: var(--text-muted); font-size: 0.67rem; }
+
+/* Route summary card */
+.route-card {
+  max-width: 520px; margin: 0 auto 8px; padding: 0 16px;
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.5s;
+}
+.route-inner {
+  background: var(--bg-surface); border: 1px solid var(--border-medium);
+  border-radius: var(--radius); padding: 18px 22px; overflow: hidden;
+}
+.route-inner h2 {
+  font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+  color: var(--text-primary); margin-bottom: 12px;
+}
+.route-grid {
+  display: grid; grid-template-columns: 1fr auto auto; gap: 6px 16px;
+  font-size: 0.75rem;
+}
+.route-grid .rg-label { color: var(--text-secondary); }
+.route-grid .rg-dist { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); text-align: right; }
+.route-grid .rg-time { font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent-emerald); text-align: right; }
+.route-grid .rg-total { color: var(--text-primary); font-weight: 600; border-top: 1px solid var(--border-subtle); padding-top: 6px; margin-top: 4px; }
+
+/* Footer summary */
+.summary-card {
+  max-width: 520px; margin: 24px auto 48px; padding: 0 16px;
+}
+.summary-inner {
+  background: var(--bg-surface); border: 1px solid var(--border-medium);
+  border-radius: var(--radius); overflow: hidden;
+}
+.summary-inner h2 {
+  font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+  color: var(--text-primary); padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.sum-table { width: 100%; border-collapse: collapse; }
+.sum-table th, .sum-table td {
+  padding: 9px 16px; text-align: left; font-size: 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.sum-table th {
+  font-family: var(--font-mono); font-size: 0.6rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted);
+  background: var(--bg-card);
+}
+.sum-table td:first-child { font-weight: 600; color: var(--text-primary); }
+.sum-table tr:last-child td { border-bottom: none; }
+
+.sum-note {
+  padding: 16px 22px; font-size: 0.75rem; line-height: 1.6;
+  color: var(--text-secondary);
+  background: linear-gradient(135deg, rgba(52,211,153,0.04), rgba(56,189,248,0.03));
+  border-top: 1px solid var(--border-subtle);
+}
+.sum-note strong { color: var(--accent-emerald); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 560px) {
+  .hero { padding: 32px 16px 24px; }
+  .timeline-wrap { padding: 0 10px 40px; }
+  .route-card, .summary-card { padding: 0 10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">Road Trip Itinerary · Apr 15–17, 2026</div>
+  <h1>TYS → Smokies → <em>Houston</em></h1>
+  <p class="hero-sub">Knoxville · Gatlinburg · Pigeon Forge · Birmingham · Meridian · Baton Rouge · Houston</p>
+</div>
+
+<!-- FLIGHTS BANNER -->
+<div class="reminder-banner">
+  <div class="reminder-inner">
+    <div class="reminder-tag">✈️ Flight Info</div>
+    <div class="reminder-title">American Airlines — Inbound &amp; Outbound</div>
+    <div class="reminder-body">
+      <strong>Inbound:</strong> Wed Apr 15 · DCA 1:59 PM → TYS 3:45 PM
+      <div class="reminder-times">
+        <span class="reminder-chip">AA 5651 · Apr 15</span>
+        <span class="reminder-chip">DCA → TYS</span>
+        <span class="reminder-chip">Conf: GWSBHK</span>
+      </div>
+      <div class="flight-divider"></div>
+      <strong>Outbound:</strong> Tue Apr 21 · IAH 4:50 PM → DCA 9:00 PM
+      <div class="reminder-times">
+        <span class="reminder-chip">AA 5132 · Apr 21</span>
+        <span class="reminder-chip">IAH → DCA</span>
+        <span class="reminder-chip">Seat 17C · Conf: MIJKEF</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend-bar">
+  <div class="legend-chip"><div class="legend-pip" style="background:var(--text-muted)"></div> Drive</div>
+  <div class="legend-chip"><div class="legend-pip" style="background:var(--accent-violet)"></div> Activity</div>
+  <div class="legend-chip"><div class="legend-pip" style="background:var(--accent-teal)"></div> Meal</div>
+  <div class="legend-chip"><div class="legend-pip" style="background:var(--accent-sky)"></div> Hotel</div>
+  <div class="legend-chip"><div class="legend-pip" style="background:var(--accent-emerald)"></div> Arrival</div>
+  <div class="legend-chip"><span class="badge-sm bv">🥬 All Veg</span></div>
+</div>
+
+<!-- ROUTE SUMMARY -->
+<div class="route-card">
+  <div class="route-inner">
+    <h2>Drive Segments — Thu &amp; Fri</h2>
+    <div class="route-grid">
+      <span class="rg-label">Pigeon Forge → Birmingham (Thu)</span>
+      <span class="rg-dist">~270 mi</span>
+      <span class="rg-time">~4.5 hrs</span>
+
+      <span class="rg-label">Birmingham → Meridian (Thu post-dinner)</span>
+      <span class="rg-dist">~148 mi</span>
+      <span class="rg-time">~2.5 hrs</span>
+
+      <span class="rg-label">Meridian → Houston (Fri)</span>
+      <span class="rg-dist">~490 mi</span>
+      <span class="rg-time">~7.5 hrs</span>
+
+      <span class="rg-label rg-total">Total drive</span>
+      <span class="rg-dist rg-total">~908 mi</span>
+      <span class="rg-time rg-total">~14.5 hrs</span>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ TIMELINE ════════════ -->
+<div class="timeline-wrap">
+
+  <!-- ── WEDNESDAY ── -->
+  <div class="day-sep"><div class="day-sep-line"></div><div class="day-sep-label">Wed · Apr 15 — Smokies Evening</div><div class="day-sep-line"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-drive">
+      <div class="node-icon">✈️</div>
+      <div class="node-title">Land TYS — Meet &amp; Grab Car</div>
+      <div class="node-time">4:00 PM EDT</div>
+      <div class="node-sub">American Airlines AA 5651 · Arrives TYS from DCA</div>
+      <div class="node-badges">
+        <span class="badge badge-info">Conf: GWSBHK</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Inbound Flight</strong><br>AA 5651 · DCA 1:59 PM → TYS 3:45 PM<br>Confirmation: GWSBHK<br><br>Meet up at baggage claim, grab car, head straight into the Smokies!</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~1h 15m drive to Smokies</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-activity">
+      <div class="node-icon">🏔️</div>
+      <div class="node-title">Sugarlands Visitor Center</div>
+      <div class="node-time">5:15 PM</div>
+      <div class="node-sub">Parking tag kiosk — get pass before heading up</div>
+      <div class="node-badges">
+        <span class="badge badge-info">Parking Tag</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Sugarlands Visitor Center</strong><br>Pick up parking tag at kiosk here — required for Kuwohi Rd.<br>Quick stop, ~5–10 min.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~30 min · Newfound Gap Rd</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-activity">
+      <div class="node-icon">📸</div>
+      <div class="node-title">Newfound Gap Overlook</div>
+      <div class="node-time">5:45 PM</div>
+      <div class="node-sub">Quick 15 min photo stop — stunning ridge views at 5,046 ft</div>
+      <div class="node-badges">
+        <span class="badge badge-open">15 min stop</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Newfound Gap</strong><br>5,046 ft elevation — panoramic ridge views.<br>Quick photo stop, 15 min max. Keep moving toward Kuwohi.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">Kuwohi Rd</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-activity">
+      <div class="node-icon">🥾</div>
+      <div class="node-title">Kuwohi — Hike to Observation Tower</div>
+      <div class="node-time">6:15 PM</div>
+      <div class="node-sub">~1 mile trail up to the summit tower · 6,643 ft</div>
+      <div class="node-badges">
+        <span class="badge badge-open">~1 mi trail</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Kuwohi Trail</strong><br>~1 mile hike to the observation tower.<br>Moderate — mostly paved/gravel path.<br>Takes ~45–60 min up and back.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~1 hr hike</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-activity">
+      <div class="node-icon">🌅</div>
+      <div class="node-title">Golden Hour + Sunset at Kuwohi</div>
+      <div class="node-time">7:15 – 8:00 PM</div>
+      <div class="node-sub">6,643 ft — highest point in the Great Smoky Mountains</div>
+      <div class="node-badges">
+        <span class="badge badge-open">Summit Views</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Kuwohi Summit</strong><br>Highest point in the Great Smoky Mountains at 6,643 ft.<br>360° views, golden hour light, observation tower.<br>The highlight of Wednesday evening.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">back down ~45 min · into Gatlinburg</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-optional">
+      <div class="node-icon">🚡</div>
+      <div class="node-title">SkyPark Ropeway — Optional</div>
+      <div class="node-time">8:45 PM</div>
+      <div class="node-sub">Closes 9 PM — very tight, skip without hesitation if running late</div>
+      <div class="node-badges">
+        <span class="badge badge-warn">⚠ Closes 9 PM</span>
+      </div>
+    </div>
+    <div class="tip"><strong>SkyBridge Mountain</strong><br>Closes at 9 PM sharp.<br><span class="tip-warn">Only attempt if back in Gatlinburg by 8:45 PM.</span><br>Skip without hesitation — Kuwohi sunset is the main event anyway.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">Parkway strip</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-meal">
+      <div class="node-icon">🍚</div>
+      <div class="node-title">Dinner — Curd Rice</div>
+      <div class="node-time">9:15 PM</div>
+      <div class="node-sub">Homemade · walk around the Gatlinburg Parkway strip after</div>
+      <div class="node-badges">
+        <span class="badge badge-diet-veg">🥬 Home-cooked</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Wednesday Dinner</strong><br>Curd rice — homemade and sorted.<br>Walk the Parkway strip after, soak in the Gatlinburg vibe before bed.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~15 min</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-hotel">
+      <div class="node-icon">🏨</div>
+      <div class="node-title">Check into Hotel / Cabin</div>
+      <div class="node-time">10:30 PM</div>
+      <div class="node-sub">Gatlinburg area</div>
+    </div>
+    <div class="tip"><strong>Wednesday Night Stay</strong><br>Gatlinburg area hotel or cabin.<br>Rest up — early start with standup call tomorrow morning.</div>
+  </div>
+
+  <!-- ── THURSDAY ── -->
+  <div class="day-sep"><div class="day-sep-line"></div><div class="day-sep-label">Thu · Apr 16 — WFH + Drive</div><div class="day-sep-line"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-reminder">
+      <div class="node-icon">💻</div>
+      <div class="node-title">Standup Call</div>
+      <div class="node-time">9:45 – 10:25 AM</div>
+      <div class="node-sub">Remote from hotel/cabin</div>
+      <div class="node-badges">
+        <span class="badge badge-work">Work</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Thursday Morning Work</strong><br>Standup at 9:45 AM from hotel.<br>Wrap up remaining work 10:25 AM – 12:00 PM.<br>No meetings after 12 PM — stay online 12–3 PM from the car if needed.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">wrap up · late checkout</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-reminder">
+      <div class="node-icon">🧳</div>
+      <div class="node-title">Late Checkout + Load Car</div>
+      <div class="node-time">12:00 PM</div>
+      <div class="node-sub">Pack up, load the car, ready to roll</div>
+      <div class="node-badges">
+        <span class="badge badge-work">WFH from car 12–3 PM</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Checkout</strong><br>Late checkout at 12 PM.<br>Can stay online 12–3 PM and handle anything urgent from the car.<br>No meetings scheduled after 12 PM on Thursday.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">Pigeon Forge Pkwy</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-meal">
+      <div class="node-icon">🍛</div>
+      <div class="node-title">Lunch — Spice Express Indian Kitchen</div>
+      <div class="node-time">12:30 PM</div>
+      <div class="node-sub">3784 Pkwy Suite 101, Pigeon Forge · Opens 12 PM daily · 50+ items</div>
+      <div class="node-badges">
+        <span class="badge badge-diet-veg">🥬 Indian Veg</span>
+        <span class="badge badge-rec">⭐ Recommended</span>
+        <span class="badge badge-open">Opens 12 PM ✅</span>
+      </div>
+      <a class="node-link" href="https://spiceexpressindiankitchen.com" target="_blank" rel="noopener">→ spiceexpressindiankitchen.com</a>
+    </div>
+    <div class="tip"><strong>Spice Express Indian Kitchen</strong><br>3784 Pkwy Suite 101, Pigeon Forge<br><span class="tip-hours">Opens 12 PM daily ✅ — perfect for 12:30 PM</span><br>50+ items — dal, curries, biryanis, chana masala, full Indian veg menu<br><br><span class="tip-alt">Alt: Paloma Scratch Kitchen — modern Latin, seasonal veg/vegan options</span></div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">1:00 PM · I-40 West</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-stop">
+      <div class="node-icon">⛽</div>
+      <div class="node-title">Buc-ee's Kodak, TN</div>
+      <div class="node-time">1:20 PM</div>
+      <div class="node-sub">World's 2nd largest Buc-ee's — fuel up + road snacks</div>
+      <div class="node-badges">
+        <span class="badge badge-info">Fuel Stop</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Buc-ee's Kodak</strong><br>World's 2nd largest Buc-ee's.<br>Top off fuel here — long stretch ahead to Birmingham.<br>Skip if tight on time, next stop is Birmingham.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~4 hrs · I-40 W → I-59 S</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-meal">
+      <div class="node-icon">🍽️</div>
+      <div class="node-title">Dinner — Bay Leaf Modern Indian</div>
+      <div class="node-time">6:00 PM</div>
+      <div class="node-sub">1024 20th St S, Birmingham · Five Points South · Open 5–9:30 PM</div>
+      <div class="node-badges">
+        <span class="badge badge-diet-veg">🥬 Indian Veg</span>
+        <span class="badge badge-rec">⭐ Recommended</span>
+        <span class="badge badge-open">Open 5–9:30 PM ✅</span>
+      </div>
+      <a class="node-link" href="https://www.bayleafbham.com" target="_blank" rel="noopener">→ bayleafbham.com</a>
+    </div>
+    <div class="tip"><strong>Bay Leaf Modern Indian — 5 Points</strong><br>1024 20th St S, Birmingham, AL<br><span class="tip-hours">Open Thu 5–9:30 PM ✅ (arrive ~5:30 PM)</span><br>Dal, curries, biryanis, chana masala, hakka noodles<br><br><span class="tip-alt">Alt: Juniper — plant-based fine dining, 3811 Clairmont Ave, 4–10:30 PM</span><br><br><span class="tip-strike">Highlands Bar &amp; Grill — temporarily closed Apr 2026</span><br><span class="tip-strike">Helen — meat/seafood focused, vegan incidental</span><br><span class="tip-strike">Automatic Seafood — seafood-centric, not Indian veg</span></div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">8:00 PM · I-20 West · post-dinner</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-drive">
+      <div class="node-icon">🚗</div>
+      <div class="node-title">Drive Birmingham → Meridian</div>
+      <div class="node-time">8:00 PM</div>
+      <div class="node-sub">~148 miles · ~2.5 hrs · I-20 West · easy post-dinner cruise</div>
+    </div>
+    <div class="tip"><strong>Post-Dinner Drive</strong><br>~148 miles on I-20 West.<br>Easy, flat highway. Arrive Meridian ~10:15 PM.<br><br>Why Meridian and not stay in Birmingham? Cuts Friday drive from ~667 mi → ~490 mi, arriving Houston ~1 hr earlier.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">arrive ~10:15 PM</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-hotel">
+      <div class="node-icon">🏨</div>
+      <div class="node-title">Drury Inn &amp; Suites Meridian</div>
+      <div class="node-time">10:15 PM</div>
+      <div class="node-sub">Meridian, MS · Free hot breakfast · Right off I-20</div>
+      <div class="node-badges">
+        <span class="badge badge-rec">⭐ Recommended</span>
+        <span class="badge badge-open">Free Breakfast</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Drury Inn &amp; Suites Meridian</strong><br>Top-rated for cleanliness and comfort.<br>Free hot breakfast included — great for early Friday start.<br>Right off I-20 — easy in/out.<br><br><span class="tip-alt">Alt 1: The Threefoot Hotel (Marriott Tribute) — 4-star boutique, historic</span><br><span class="tip-alt">Alt 2: Hilton Garden Inn — indoor pool + hot tub</span></div>
+  </div>
+
+  <!-- ── FRIDAY ── -->
+  <div class="day-sep"><div class="day-sep-line"></div><div class="day-sep-label">Fri · Apr 17 — Meridian to Houston</div><div class="day-sep-line"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-meal">
+      <div class="node-icon">🍳</div>
+      <div class="node-title">Breakfast at Drury Inn</div>
+      <div class="node-time">7:00 AM</div>
+      <div class="node-sub">Free hot breakfast included · fuel up for the ~490 mile drive ahead</div>
+      <div class="node-badges">
+        <span class="badge badge-diet-veg">🥬 Veg Options</span>
+        <span class="badge badge-open">Included ✅</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Free Hot Breakfast</strong><br>Drury Inn includes hot breakfast — eggs, waffles, fruit, etc.<br>Good reason to pick Drury over other Meridian hotels.<br>Eat well before the long drive.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">7:30 AM · I-20 W → I-59 → I-10</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-stop">
+      <div class="node-icon">⛽</div>
+      <div class="node-title">Buc-ee's Pass Christian, MS</div>
+      <div class="node-time">10:30 AM</div>
+      <div class="node-sub">~145 miles from Meridian · fuel + snacks stop</div>
+      <div class="node-badges">
+        <span class="badge badge-info">Fuel Stop</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Pass Christian Buc-ee's</strong><br>~2.5 hrs from Meridian.<br>Fuel + stretch + snacks before the Louisiana stretch.<br>Skip if moving well — next stop is Baton Rouge lunch.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~3 hrs · I-10 West</div><div class="conn-stem"></div></div>
+
+  <div class="ref-line"><div class="ref-line-dash"></div><div class="ref-line-label">Lunch Stop — Baton Rouge</div><div class="ref-line-dash"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-meal">
+      <div class="node-icon">🌿</div>
+      <div class="node-title">Lunch — The Plantry Café</div>
+      <div class="node-time">1:30 PM</div>
+      <div class="node-sub">5454 Bluebonnet Blvd, Baton Rouge, LA · Fully vegan · near I-10</div>
+      <div class="node-badges">
+        <span class="badge badge-diet-veg">🥬 Fully Vegan</span>
+        <span class="badge badge-rec">⭐ Recommended</span>
+      </div>
+      <a class="node-link" href="https://plantrycafe.com" target="_blank" rel="noopener">→ plantrycafe.com</a>
+    </div>
+    <div class="tip"><strong>The Plantry Café</strong><br>5454 Bluebonnet Blvd, Baton Rouge LA<br>Fully vegan restaurant near I-10<br><br>Oyster-mushroom po'boy, mushroom scallops, vegan charcuterie — Louisiana classics reimagined plant-based.<br><br><span class="tip-alt">Alt: MJ's Café — plant-based, 5162 Government St, Baton Rouge</span></div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~1.5 hrs · I-10 West</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-stop">
+      <div class="node-icon">⛽</div>
+      <div class="node-title">Buc-ee's Baytown, TX</div>
+      <div class="node-time">3:00 PM</div>
+      <div class="node-sub">Final fuel stop · ~30 min from downtown Houston</div>
+      <div class="node-badges">
+        <span class="badge badge-info">Final Fuel Stop</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Baytown Buc-ee's</strong><br>Last stop before Houston.<br>Top off fuel, final stretch — ~30 min to the city.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~30 min</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-home">
+      <div class="node-icon">🏁</div>
+      <div class="node-title">Arrive Houston!</div>
+      <div class="node-time">~4:30 PM</div>
+      <div class="node-sub">IAH area · ~1 hr earlier than if we'd stayed overnight in Birmingham</div>
+      <div class="node-badges">
+        <span class="badge badge-open">✅ Early Arrival</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Houston!</strong><br>~490 miles from Meridian — much more manageable than ~667 miles from Birmingham.<br>Arrive ~4:30 PM with evening to spare.<br><br>Return flight: Tue Apr 21 · IAH 4:50 PM → DCA · AA 5132 · Seat 17C</div>
+  </div>
+
+</div><!-- /timeline-wrap -->
+
+<!-- SUMMARY TABLE -->
+<div class="summary-card">
+  <div class="summary-inner">
+    <h2>Trip Overview</h2>
+    <table class="sum-table">
+      <thead>
+        <tr><th>Day</th><th>Key Details</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Wed Apr 15</td>
+          <td>Land TYS 4 PM · Sugarlands → Newfound Gap → Kuwohi sunset 🌅 · Curd rice dinner 🥬 · Hotel Gatlinburg</td>
+        </tr>
+        <tr>
+          <td>Thu Apr 16</td>
+          <td>WFH 9:45–12 PM · Lunch Spice Express PF 🥬 · I-40 W → Birmingham · Dinner Bay Leaf 🥬 · I-20 W → Overnight Meridian</td>
+        </tr>
+        <tr>
+          <td>Fri Apr 17</td>
+          <td>Breakfast Drury Inn 🥬 · I-20/I-59/I-10 · Pass Christian fuel · Lunch The Plantry Baton Rouge 🥬 · Baytown fuel · Houston ~4:30 PM 🏁</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="sum-note">
+      <strong>🥬 All meals on this trip are vegetarian/vegan-friendly</strong><br>
+      Two drivers swapping on I-40/I-20/I-10 · All daylight driving · Buc-ee's stops optional, skip if moving well<br>
+      <strong>⭐ Reservation recommended</strong> at Bay Leaf Modern Indian, Birmingham (Thu 5–9:30 PM) · Friday off work, any leftover tasks can be handled en route
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
