@@ -1,0 +1,943 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Portland → Seattle Trip — Itinerary</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,700;1,400&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root {
+  --bg-deep: #08090d;
+  --bg-surface: #0f1118;
+  --bg-card: #161822;
+  --bg-elevated: #1c1f2e;
+  --border-subtle: rgba(255,255,255,0.06);
+  --border-medium: rgba(255,255,255,0.1);
+  --text-primary: #e8eaf0;
+  --text-secondary: #8b90a5;
+  --text-muted: #555970;
+  --accent-emerald: #34d399;
+  --accent-emerald-dim: rgba(52,211,153,0.12);
+  --accent-amber: #fbbf24;
+  --accent-amber-dim: rgba(251,191,36,0.12);
+  --accent-rose: #fb7185;
+  --accent-rose-dim: rgba(251,113,133,0.1);
+  --accent-sky: #38bdf8;
+  --accent-sky-dim: rgba(56,189,248,0.1);
+  --accent-teal: #2dd4bf;
+  --accent-teal-dim: rgba(45,212,191,0.1);
+  --accent-violet: #a78bfa;
+  --accent-violet-dim: rgba(167,139,250,0.1);
+  --accent-gold: #f59e0b;
+  --radius: 14px;
+  --radius-sm: 8px;
+  --radius-xs: 5px;
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-body: 'DM Sans', -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font-body);
+  background: var(--bg-deep);
+  color: var(--text-primary);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+body::before {
+  content: '';
+  position: fixed; inset: 0; z-index: 9999;
+  pointer-events: none; opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)'/%3E%3C/svg%3E");
+  background-repeat: repeat; background-size: 200px;
+}
+
+/* ─── HEADER ─── */
+.hero {
+  position: relative; padding: 48px 24px 32px; text-align: center; overflow: hidden;
+}
+.hero::before {
+  content: ''; position: absolute;
+  top: -120px; left: 50%; transform: translateX(-50%);
+  width: 700px; height: 440px;
+  background: radial-gradient(ellipse, rgba(52,211,153,0.07) 0%, rgba(56,189,248,0.06) 35%, rgba(45,212,191,0.04) 60%, transparent 75%);
+  pointer-events: none;
+}
+.hero-eyebrow {
+  font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500;
+  letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--accent-emerald); margin-bottom: 14px;
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.1s;
+}
+.hero h1 {
+  font-family: var(--font-display); font-size: clamp(1.8rem, 4vw, 2.6rem);
+  font-weight: 900; line-height: 1.15; letter-spacing: -0.02em; color: var(--text-primary);
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.2s;
+}
+.hero h1 em { font-style: italic; color: var(--accent-sky); }
+.hero h1 span { color: var(--accent-emerald); }
+.hero-sub {
+  font-size: 0.85rem; color: var(--text-secondary); margin-top: 12px; line-height: 1.6;
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.35s;
+}
+
+/* ─── HIGHLIGHT BANNER ─── */
+.reminder-banner {
+  max-width: 600px; margin: 0 auto 32px; padding: 0 20px;
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.4s;
+}
+.reminder-inner {
+  background: linear-gradient(135deg, rgba(167,139,250,0.08), rgba(52,211,153,0.05));
+  border: 1.5px solid rgba(167,139,250,0.25);
+  border-radius: var(--radius); padding: 18px 22px;
+  position: relative; overflow: hidden;
+}
+.reminder-inner::before {
+  content: ''; position: absolute; top: 0; left: 0; width: 4px; height: 100%;
+  background: linear-gradient(180deg, var(--accent-violet), var(--accent-emerald));
+}
+.reminder-tag {
+  font-family: var(--font-mono); font-size: 0.6rem; font-weight: 700;
+  letter-spacing: 0.14em; text-transform: uppercase;
+  color: var(--accent-violet); margin-bottom: 8px;
+}
+.reminder-title {
+  font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+  color: var(--text-primary); margin-bottom: 6px;
+}
+.reminder-body {
+  font-size: 0.78rem; color: var(--text-secondary); line-height: 1.7;
+}
+.reminder-body strong { color: var(--accent-emerald); }
+.reminder-times {
+  display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0;
+}
+.reminder-chip {
+  font-family: var(--font-mono); font-size: 0.65rem; font-weight: 600;
+  background: var(--accent-emerald-dim); color: var(--accent-emerald);
+  border: 1px solid rgba(52,211,153,0.2);
+  padding: 4px 12px; border-radius: 20px;
+}
+.reminder-chip.amber {
+  background: var(--accent-amber-dim); color: var(--accent-amber);
+  border-color: rgba(251,191,36,0.2);
+}
+.reminder-chip.sky {
+  background: var(--accent-sky-dim); color: var(--accent-sky);
+  border-color: rgba(56,189,248,0.2);
+}
+
+/* ─── LEGEND ─── */
+.legend-bar {
+  display: flex; flex-wrap: wrap; gap: 12px; justify-content: center;
+  padding: 0 24px 28px;
+  opacity: 0; animation: fadeUp 0.5s ease forwards 0.45s;
+}
+.legend-chip {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 0.68rem; font-weight: 500; color: var(--text-secondary);
+  background: var(--bg-card); border: 1px solid var(--border-subtle);
+  border-radius: 20px; padding: 4px 10px 4px 7px;
+}
+.legend-pip { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.badge-sm {
+  font-family: var(--font-mono); font-size: 0.58rem; font-weight: 700;
+  border-radius: 4px; padding: 2px 6px; text-transform: uppercase; letter-spacing: 0.05em;
+}
+
+/* ─── TIMELINE CONTAINER ─── */
+.timeline-wrap {
+  max-width: 520px; margin: 0 auto; padding: 0 16px 48px;
+}
+
+/* Day separator */
+.day-sep {
+  display: flex; align-items: center; gap: 10px;
+  padding: 20px 0 10px;
+}
+.day-sep-line { flex: 1; height: 1px; background: var(--border-medium); }
+.day-sep-label {
+  font-family: var(--font-mono); font-size: 0.65rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase; color: var(--text-muted);
+  white-space: nowrap; padding: 5px 14px; border-radius: 4px;
+  background: var(--bg-elevated); border: 1px solid var(--border-subtle);
+}
+
+/* Nodes */
+.node-card {
+  position: relative; padding: 14px 16px; border-radius: var(--radius-sm);
+  border: 1px solid; transition: transform 0.2s ease, box-shadow 0.2s ease; cursor: default;
+}
+.node-card:hover {
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: 0 8px 32px rgba(0,0,0,0.4); z-index: 10;
+}
+.node-drive    { background: var(--bg-card); border-color: var(--border-subtle); }
+.node-stop     { background: var(--bg-card); border-color: var(--border-medium); }
+.node-highlight { background: var(--accent-emerald-dim); border-color: rgba(52,211,153,0.3); }
+.node-optional  { background: var(--accent-amber-dim); border-color: rgba(251,191,36,0.3); }
+.node-golden    { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.3); }
+.node-meal     { background: var(--accent-teal-dim); border-color: rgba(45,212,191,0.2); }
+.node-hotel    { background: var(--accent-sky-dim); border-color: rgba(56,189,248,0.2); }
+.node-activity { background: var(--accent-violet-dim); border-color: rgba(167,139,250,0.2); }
+.node-home     { background: var(--accent-emerald-dim); border-color: rgba(52,211,153,0.25); }
+.node-warning  {
+  background: linear-gradient(135deg, rgba(251,191,36,0.06), rgba(245,158,11,0.04));
+  border-color: rgba(251,191,36,0.25);
+  border-style: dashed;
+}
+
+.node-icon { font-size: 1rem; margin-bottom: 3px; }
+.node-title { font-size: 0.82rem; font-weight: 600; color: var(--text-primary); line-height: 1.35; }
+.node-time { font-family: var(--font-mono); font-size: 0.68rem; font-weight: 500; color: var(--text-secondary); margin-top: 3px; }
+.node-sub { font-size: 0.68rem; color: var(--text-muted); margin-top: 4px; line-height: 1.5; }
+.node-badges { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.badge {
+  font-family: var(--font-mono); font-size: 0.58rem; font-weight: 700;
+  border-radius: var(--radius-xs); padding: 3px 8px;
+  letter-spacing: 0.04em; text-transform: uppercase; white-space: nowrap;
+}
+.badge-open     { background: var(--accent-emerald-dim); color: var(--accent-emerald); }
+.badge-tight    { background: var(--accent-amber-dim); color: var(--accent-amber); }
+.badge-warn     { background: var(--accent-amber-dim); color: var(--accent-amber); }
+.badge-fixed    { background: rgba(245,158,11,0.12); color: var(--accent-gold); }
+.badge-sky      { background: var(--accent-sky-dim); color: var(--accent-sky); }
+.badge-violet   { background: var(--accent-violet-dim); color: var(--accent-violet); }
+.badge-optional { background: rgba(251,191,36,0.08); color: var(--accent-amber); border: 1px solid rgba(251,191,36,0.2); }
+.badge-info     { background: var(--accent-sky-dim); color: var(--accent-sky); }
+
+.node-link {
+  display: inline-block; margin-top: 6px;
+  font-family: var(--font-mono); font-size: 0.66rem; font-weight: 600;
+  color: var(--accent-sky); text-decoration: none;
+  border-bottom: 1px dashed rgba(56,189,248,0.4);
+  transition: color 0.2s;
+}
+.node-link:hover { color: #7dd3fc; }
+
+/* Connector */
+.connector {
+  display: flex; flex-direction: column; align-items: center; padding: 3px 0;
+}
+.conn-stem {
+  width: 1px; height: 14px;
+  background: linear-gradient(180deg, var(--border-medium), var(--text-muted));
+}
+.conn-tag {
+  font-family: var(--font-mono); font-size: 0.6rem; font-weight: 500;
+  color: var(--text-muted); background: var(--bg-surface);
+  border: 1px solid var(--border-subtle); border-radius: 10px;
+  padding: 2px 10px; white-space: nowrap;
+}
+
+/* Reference line */
+.ref-line { display: flex; align-items: center; gap: 8px; padding: 8px 0; }
+.ref-line-dash { flex: 1; height: 0; border-top: 2px dashed rgba(167,139,250,0.35); }
+.ref-line-label {
+  font-family: var(--font-mono); font-size: 0.62rem; font-weight: 600;
+  color: var(--accent-violet); white-space: nowrap; letter-spacing: 0.06em;
+}
+
+/* Golden hour ref line */
+.ref-line-golden .ref-line-dash { border-top-color: rgba(245,158,11,0.35); }
+.ref-line-golden .ref-line-label { color: var(--accent-gold); }
+
+/* Tooltip */
+.tt { position: relative; }
+.tt .tip {
+  display: none; position: absolute; bottom: calc(100% + 10px);
+  left: 50%; transform: translateX(-50%);
+  background: var(--bg-elevated); border: 1px solid var(--border-medium);
+  border-radius: var(--radius-sm); padding: 12px 14px;
+  font-size: 0.72rem; color: var(--text-primary); width: 280px;
+  z-index: 200; line-height: 1.6; box-shadow: 0 12px 40px rgba(0,0,0,0.6);
+  pointer-events: none;
+}
+.tt:hover .tip { display: block; }
+.tip strong { color: #fff; }
+.tip .tip-hours { color: var(--accent-emerald); font-family: var(--font-mono); font-size: 0.66rem; }
+.tip .tip-warn { color: var(--accent-amber); }
+.tip .tip-note { color: var(--accent-sky); }
+
+/* Route summary card */
+.route-card {
+  max-width: 520px; margin: 0 auto 8px; padding: 0 16px;
+  opacity: 0; animation: fadeUp 0.6s ease forwards 0.5s;
+}
+.route-inner {
+  background: var(--bg-surface); border: 1px solid var(--border-medium);
+  border-radius: var(--radius); padding: 18px 22px; overflow: hidden;
+}
+.route-inner h2 {
+  font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+  color: var(--text-primary); margin-bottom: 12px;
+}
+.route-grid {
+  display: grid; grid-template-columns: 1fr auto auto; gap: 6px 16px;
+  font-size: 0.75rem;
+}
+.route-grid .rg-label { color: var(--text-secondary); }
+.route-grid .rg-dist { font-family: var(--font-mono); font-size: 0.7rem; color: var(--text-muted); text-align: right; }
+.route-grid .rg-time { font-family: var(--font-mono); font-size: 0.7rem; color: var(--accent-emerald); text-align: right; }
+.route-grid .rg-total { color: var(--text-primary); font-weight: 600; border-top: 1px solid var(--border-subtle); padding-top: 6px; margin-top: 4px; }
+
+/* Footer summary */
+.summary-card {
+  max-width: 520px; margin: 24px auto 48px; padding: 0 16px;
+}
+.summary-inner {
+  background: var(--bg-surface); border: 1px solid var(--border-medium);
+  border-radius: var(--radius); overflow: hidden;
+}
+.summary-inner h2 {
+  font-family: var(--font-display); font-size: 1rem; font-weight: 700;
+  color: var(--text-primary); padding: 18px 22px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.sum-table { width: 100%; border-collapse: collapse; }
+.sum-table th, .sum-table td {
+  padding: 9px 16px; text-align: left; font-size: 0.75rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.sum-table th {
+  font-family: var(--font-mono); font-size: 0.6rem; font-weight: 600;
+  letter-spacing: 0.1em; text-transform: uppercase; color: var(--text-muted);
+  background: var(--bg-card);
+}
+.sum-table td:first-child { font-weight: 600; color: var(--text-primary); }
+.sum-table tr:last-child td { border-bottom: none; }
+
+.sum-note {
+  padding: 16px 22px; font-size: 0.75rem; line-height: 1.6;
+  color: var(--text-secondary);
+  background: linear-gradient(135deg, rgba(52,211,153,0.04), rgba(56,189,248,0.03));
+  border-top: 1px solid var(--border-subtle);
+}
+.sum-note strong { color: var(--accent-emerald); }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 560px) {
+  .hero { padding: 32px 16px 24px; }
+  .timeline-wrap { padding: 0 10px 40px; }
+  .route-card, .summary-card { padding: 0 10px; }
+}
+</style>
+</head>
+<body>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-eyebrow">Trip Itinerary · Apr 17–21, 2026</div>
+  <h1><span>Portland</span> → <em>Seattle</em> Road Trip</h1>
+  <p class="hero-sub">Pacific Northwest · Waterfalls · Tulips · Mountains · Coast · City</p>
+</div>
+
+<!-- HIGHLIGHT BANNER -->
+<div class="reminder-banner">
+  <div class="reminder-inner">
+    <div class="reminder-tag">🌷 Protected Time</div>
+    <div class="reminder-title">Wooden Shoe Tulip Farm — Don't Rush This</div>
+    <div class="reminder-body">
+      Golden hour at the tulip farm is the centerpiece of Saturday. Protect the
+      <strong>5:00 – 7:30 PM window</strong> — this is your don't-rush moment.
+      Be honest about energy when choosing Silver Falls vs. skipping it.
+      <div class="reminder-times">
+        <span class="reminder-chip">Skip Silver Falls → Arrive 5 PM</span>
+        <span class="reminder-chip amber">Do Silver Falls → Arrive 4:30 PM</span>
+        <span class="reminder-chip sky">Golden Hour: ~6:30–7:30 PM</span>
+      </div>
+      The tulip farm is worth the full 2.5 hours. Sunset in a tulip field is the memory.
+    </div>
+  </div>
+</div>
+
+<!-- LEGEND -->
+<div class="legend-bar">
+  <div class="legend-chip"><div class="legend-pip" style="background:var(--accent-emerald)"></div> Highlight stop</div>
+  <div class="legend-chip"><div class="legend-pip" style="background:var(--accent-gold)"></div> Golden hour / must-do</div>
+  <div class="legend-chip"><div class="legend-pip" style="background:var(--accent-amber)"></div> Optional / tight timing</div>
+  <div class="legend-chip"><div class="legend-pip" style="background:var(--accent-teal)"></div> Meal</div>
+  <div class="legend-chip"><div class="legend-pip" style="background:var(--accent-violet)"></div> Activity</div>
+  <div class="legend-chip"><div class="legend-pip" style="background:var(--accent-sky)"></div> Hotel / transit hub</div>
+</div>
+
+<!-- ROUTE SUMMARY -->
+<div class="route-card">
+  <div class="route-inner">
+    <h2>Sunday Drive Segments — Big Mileage Day</h2>
+    <div class="route-grid">
+      <span class="rg-label">Portland → Mount Hood (Paradise Park area)</span>
+      <span class="rg-dist">~55 mi</span>
+      <span class="rg-time">~1h 30m</span>
+
+      <span class="rg-label">Mount Hood → Cannon Beach (via US-26 W)</span>
+      <span class="rg-dist">~95 mi</span>
+      <span class="rg-time">~2h 30m</span>
+
+      <span class="rg-label">Cannon Beach → Portland</span>
+      <span class="rg-dist">~80 mi</span>
+      <span class="rg-time">~2h</span>
+
+      <span class="rg-label">Portland → Seattle (I-5 N)</span>
+      <span class="rg-dist">~175 mi</span>
+      <span class="rg-time">~3h</span>
+
+      <span class="rg-label rg-total">Total Sunday drive</span>
+      <span class="rg-dist rg-total">~405 mi</span>
+      <span class="rg-time rg-total">~9h total</span>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════ TIMELINE ════════════ -->
+<div class="timeline-wrap">
+
+  <!-- ── FRIDAY NIGHT ── -->
+  <div class="day-sep"><div class="day-sep-line"></div><div class="day-sep-label">Fri · Apr 17 — Portland Arrival (Low Effort)</div><div class="day-sep-line"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-hotel">
+      <div class="node-icon">🏨</div>
+      <div class="node-title">Arrive Portland + Check-in</div>
+      <div class="node-time">7:00 PM</div>
+      <div class="node-sub">Freshen up · 30–45 min buffer before heading out</div>
+      <div class="node-badges">
+        <span class="badge badge-sky">✅ Settle in first</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Check-in First</strong><br>Don't rush to dinner. Take 30–45 min to freshen up, drop bags, get oriented. Downtown Portland hotels are walkable to everything tonight.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~10 min walk or short drive</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-meal">
+      <div class="node-icon">🥢</div>
+      <div class="node-title">Dinner — Din Tai Fung</div>
+      <div class="node-time">7:45 – 8:45 PM</div>
+      <div class="node-sub">Soup dumplings · XLB · Budget a 15–30 min wait buffer for the line</div>
+      <div class="node-badges">
+        <span class="badge badge-warn">⏱ 15–30 min wait expected</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Din Tai Fung Portland</strong><br>World-famous soup dumplings (XLB). Expect a line — put your name in as soon as you arrive.<br><br>Order: XLB pork dumplings, shrimp fried rice, green beans, wontons in chili oil.<br><br>Budget 15–30 min of waiting + 1 hr dining.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">10–12 min walk</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-activity">
+      <div class="node-icon">📚</div>
+      <div class="node-title">Powell's City of Books</div>
+      <div class="node-time">8:45 – 9:00 PM</div>
+      <div class="node-sub">World's largest independent bookstore · Quick evening browse</div>
+      <div class="node-badges">
+        <span class="badge badge-violet">Icon stop</span>
+        <span class="badge badge-info">Check closing time</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Powell's City of Books</strong><br>1005 W Burnside St, Portland OR<br><br>The world's largest independent bookstore — an entire city block of used and new books.<br><br><span class="tip-note">Check closing time: typically 10 PM.</span> Even a short walk through is worth it on the way back to the hotel.<br><br>Colored maps available at the entrance to navigate rooms.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">back to hotel · early rest</div><div class="conn-stem"></div></div>
+
+  <!-- ── SATURDAY ── -->
+  <div class="day-sep"><div class="day-sep-line"></div><div class="day-sep-label">Sat · Apr 18 — Big Nature Day (Tight but Clean)</div><div class="day-sep-line"></div></div>
+
+  <!-- MORNING BLOCK -->
+  <div class="tt">
+    <div class="node-card node-activity">
+      <div class="node-icon">🥐</div>
+      <div class="node-title">PSU Farmers Market</div>
+      <div class="node-time">8:30 – 9:30 AM</div>
+      <div class="node-sub">Portland State University · Local food, coffee, fresh produce · Saturday only</div>
+      <div class="node-badges">
+        <span class="badge badge-open">✅ Sat only · Park Blocks</span>
+      </div>
+    </div>
+    <div class="tip"><strong>PSU Farmers Market</strong><br>Park Blocks, SW Park Ave, Portland<br>One of the best farmers markets in the Pacific Northwest.<br><br>Grab breakfast here — pastries, coffee, prepared food stalls. Hit early before crowds build.<br><br><span class="tip-hours">Sat: 8:30 AM – 2:00 PM</span></div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">10 min walk</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-stop">
+      <div class="node-icon">🌊</div>
+      <div class="node-title">South Waterfront Park</div>
+      <div class="node-time">9:30 – 9:40 AM · Quick stroll (35 min max)</div>
+      <div class="node-sub">Willamette River · City skyline views · Keep it brief</div>
+    </div>
+    <div class="tip"><strong>South Waterfront Park</strong><br>Quick scenic stop along the Willamette River. Don't linger — you have Washington Park next and the waterfalls after that. 35 min MAX here then drive.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">15–20 min drive</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-highlight">
+      <div class="node-icon">🌹</div>
+      <div class="node-title">International Rose Test Garden — Washington Park</div>
+      <div class="node-time">10:35 – 11:45 AM (~45–60 min inside)</div>
+      <div class="node-sub">4,500 rose varieties · Peak April bloom · Free entry · Iconic Portland viewpoint</div>
+      <div class="node-badges">
+        <span class="badge badge-open">✅ Free · No reservation needed</span>
+        <span class="badge badge-open">🌸 Peak April bloom</span>
+      </div>
+    </div>
+    <div class="tip"><strong>International Rose Test Garden</strong><br>400 SW Kingston Ave, Portland (Washington Park)<br><br>The most famous rose garden in the US. 4,500+ varieties in April bloom.<br><br>Views of the Portland skyline and Mount Hood on clear days.<br>Walk around the main sections — you don't need more than 60 min.<br><br><span class="tip-note">Parking: Washington Park free lots or MAX light rail.</span><br>Don't get stuck here — waterfall block starts at 11:45 AM.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">40–45 min drive · I-84 E → Historic Columbia River Hwy</div><div class="conn-stem"></div></div>
+
+  <!-- WATERFALL BLOCK -->
+  <div class="ref-line"><div class="ref-line-dash"></div><div class="ref-line-label">Waterfall Block — Be Efficient Here</div><div class="ref-line-dash"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-highlight">
+      <div class="node-icon">💧</div>
+      <div class="node-title">Multnomah Falls</div>
+      <div class="node-time">12:30 – 1:15 PM</div>
+      <div class="node-sub">620-ft two-tiered waterfall · 10 min walk from parking · Optional bridge climb</div>
+      <div class="node-badges">
+        <span class="badge badge-open">✅ Oregon's most visited natural site</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Multnomah Falls</strong><br>Historic Columbia River Hwy, Bridal Veil OR<br><br>Oregon's tallest waterfall at 620 ft — iconic and stunning. April = peak flow.<br><br>10 min walk from parking to base. Optional short climb to the bridge for the best photo angle (~15 min round trip).<br><br><span class="tip-warn">⚠ Parking fills up — arrive by 12:30 PM. Alternatively use the shuttle from Cascade Locks.</span><br><br>Don't do the full upper trail — saves time for Horsetail Falls and tulips.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">10 min drive east</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-highlight">
+      <div class="node-icon">💦</div>
+      <div class="node-title">Horsetail Falls</div>
+      <div class="node-time">1:25 – 1:45 PM · Quick stop (right off road)</div>
+      <div class="node-sub">Beautiful falls visible from the road · Effortless stop · No serious hiking needed</div>
+      <div class="node-badges">
+        <span class="badge badge-open">✅ Easy · Walk-up from parking</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Horsetail Falls</strong><br>Historic Columbia River Hwy, east of Multnomah Falls<br><br>Visible almost directly from the road — walk up in 2 min. Much less crowded than Multnomah.<br>Also: Ponytail Falls is a 1 mi round trip further in if time allows.<br><br>Keep it to 20 min here. Tulips are waiting.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">decision point</div><div class="conn-stem"></div></div>
+
+  <!-- OPTIONAL SILVER FALLS -->
+  <div class="tt">
+    <div class="node-card node-optional">
+      <div class="node-icon">⚠️</div>
+      <div class="node-title">Optional: Silver Falls State Park</div>
+      <div class="node-time">1:45 – 3:45 PM (adds 2.5–3 hrs to your day)</div>
+      <div class="node-sub">Trail of Ten Falls · Stunning loop · BUT adds significant time before tulip farm</div>
+      <div class="node-badges">
+        <span class="badge badge-optional">⚡ Optional — Be honest about energy</span>
+        <span class="badge badge-warn">+1 hr drive each way</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Silver Falls — Only if energy is HIGH</strong><br>~1 hr drive from Horsetail Falls. Short hike inside: keep it to 1 hr MAX.<br><br><span class="tip-warn">⚠ If you do this, you'll feel rushed getting to the tulip farm. Be honest with yourself.</span><br><br>Trade-off: Silver Falls vs. arriving relaxed at the tulip farm at 5 PM for golden hour. The tulips win most days.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">~1.5 hr from Horsetail · ~45 min from Silver Falls</div><div class="conn-stem"></div></div>
+
+  <!-- TULIP FARM -->
+  <div class="ref-line ref-line-golden"><div class="ref-line-dash"></div><div class="ref-line-label">🌷 Protected Time — Golden Hour</div><div class="ref-line-dash"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-golden">
+      <div class="node-icon">🌷</div>
+      <div class="node-title">Wooden Shoe Tulip Farm</div>
+      <div class="node-time">5:00 – 7:30 PM · Stay the full 2.5 hours</div>
+      <div class="node-sub">Wooden Shoe Rd, Woodburn OR · Golden hour + sunset in a sea of tulips · Don't rush this</div>
+      <div class="node-badges">
+        <span class="badge badge-fixed">⭐ This is your don't-rush moment</span>
+        <span class="badge badge-fixed">🌅 Golden hour ~6:30 PM</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Wooden Shoe Tulip Farm</strong><br>33814 Wooden Shoe Rd, Woodburn OR 97071<br><br>Tulip Festival typically runs Apr 1–30. Peak bloom is mid-to-late April.<br><br>Golden hour light hits around 6:30 PM — stay for it. This is the trip highlight.<br><br><span class="tip-hours">Hours: typically 9 AM – dusk during festival</span><br><br>Walk through rows, take photos, find a quiet spot for sunset. There's food on site.<br><br>Check: woodenshoe.com for current hours/conditions.</div>
+  </div>
+
+  <!-- EVENING RETURN -->
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">1 hr drive back to Portland</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-stop">
+      <div class="node-icon">🌆</div>
+      <div class="node-title">Optional: South Waterfront Evening Stroll</div>
+      <div class="node-time">8:30 – 9:15 PM</div>
+      <div class="node-sub">Willamette River walk · City lights · Skip if tired — no guilt</div>
+      <div class="node-badges">
+        <span class="badge badge-optional">Optional</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Optional Evening Walk</strong><br>Quick walk along the Willamette if you have energy left. Nice views of the lit Portland skyline reflecting on the water.<br><br>Skip completely if you're tired — you have a very big day tomorrow.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">back to hotel · early rest · big drive tomorrow</div><div class="conn-stem"></div></div>
+
+  <!-- ── SUNDAY ── -->
+  <div class="day-sep"><div class="day-sep-line"></div><div class="day-sep-label">Sun · Apr 19 — Scenic Flow Day (No Chaos)</div><div class="day-sep-line"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-drive">
+      <div class="node-icon">🚗</div>
+      <div class="node-title">Depart Portland → Mount Hood</div>
+      <div class="node-time">8:00 AM · Drive 1.5 hrs</div>
+      <div class="node-sub">US-26 E toward Government Camp · Scenic mountain highway</div>
+    </div>
+    <div class="tip"><strong>Drive to Mount Hood</strong><br>US-26 E from Portland. Scenic drive through Gresham, Sandy, Government Camp.<br>Take your time — the drive itself is beautiful with clear mountain views.<br>~55 mi, 1.5 hrs.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">1.5 hr · US-26 E</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-highlight">
+      <div class="node-icon">🏔️</div>
+      <div class="node-title">Mount Hood — Viewpoints + Short Walks</div>
+      <div class="node-time">9:30 – 11:00 AM (~60–90 min)</div>
+      <div class="node-sub">Timberline Lodge area · Summit views · Light walks · No strenuous hiking needed</div>
+      <div class="node-badges">
+        <span class="badge badge-open">✅ Light exploration only</span>
+        <span class="badge badge-sky">Keep it 60–90 min</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Mount Hood — Timberline Lodge Area</strong><br>Timberline Lodge, Government Camp OR 97028<br><br>Historic 1930s lodge at 6,000 ft. Stunning views of the summit on clear days.<br><br>Stops:<br>• Timberline Lodge exterior + viewpoint<br>• Walk the alpine meadow trail (30 min)<br>• Trillium Lake if time permits (mirror reflection of the mountain)<br><br><span class="tip-note">No strenuous hikes — you have a coast drive and Seattle drive today.</span></div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">2.5 hr drive via US-26 W · Oregon coast</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-highlight">
+      <div class="node-icon">🌊</div>
+      <div class="node-title">Cannon Beach + Haystack Rock</div>
+      <div class="node-time">1:30 – 3:00 PM</div>
+      <div class="node-sub">Walk to Haystack Rock (10–15 min) · Relax on the beach · Pacific Ocean views</div>
+      <div class="node-badges">
+        <span class="badge badge-open">✅ Iconic Oregon Coast stop</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Cannon Beach</strong><br>Downtown Cannon Beach, OR<br><br>One of the most photographed spots on the Pacific coast. Haystack Rock is 235 ft tall and visible from the beach.<br><br>• Walk from downtown parking: ~10–15 min to Haystack Rock<br>• Relax, remove shoes, walk in the sand<br>• Grab lunch/coffee in the downtown shops<br><br><span class="tip-warn">April = cool ocean temps (50–55°F), likely foggy morning clearing by afternoon.</span><br>Leave by 3:00 PM for Portland rest + Seattle drive.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">2 hr drive · US-26 E → I-5 N back to Portland</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-stop">
+      <div class="node-icon">🌆</div>
+      <div class="node-title">Portland Rest + Reset</div>
+      <div class="node-time">5:00 – 6:30 PM</div>
+      <div class="node-sub">Final stroll at South Waterfront · Dinner before Seattle drive</div>
+    </div>
+    <div class="tip"><strong>Portland Reset Window</strong><br>5:00–6:30 PM buffer before the Seattle drive.<br>Grab dinner in Portland — much better options than stopping on I-5.<br>South Waterfront area has good casual restaurants along the river.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">3 hr drive · I-5 N straight shot to Seattle</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-drive">
+      <div class="node-icon">🚗</div>
+      <div class="node-title">Drive Portland → Seattle</div>
+      <div class="node-time">7:00 – 10:00 PM</div>
+      <div class="node-sub">I-5 N · ~175 mi · ~3 hrs · Sunday evening traffic possible through Tacoma</div>
+      <div class="node-badges">
+        <span class="badge badge-warn">⚠ Check traffic through Tacoma</span>
+      </div>
+    </div>
+    <div class="tip"><strong>I-5 N to Seattle</strong><br>~175 mi, ~3 hrs (Sunday evening — typically light traffic).<br><br>Possible pinch points: Tacoma Narrows, Federal Way, Sea-Tac area.<br>Use Waze/Google Maps live for real-time routing.<br>Rest stop options: Chehalis Travel Plaza (~halfway).</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">5 min from I-5 exit · worth it</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-highlight">
+      <div class="node-icon">🌃</div>
+      <div class="node-title">Kerry Park — Nighttime Skyline Stop</div>
+      <div class="node-time">10:00 – 10:20 PM</div>
+      <div class="node-sub">Queen Anne Hill · 5 min walk from parking · 15 min is enough · Best Seattle view point</div>
+      <div class="node-badges">
+        <span class="badge badge-open">✅ Classic Seattle skyline + Space Needle</span>
+        <span class="badge badge-sky">Lit city at night</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Kerry Park</strong><br>211 W Highland Dr, Seattle WA (Queen Anne neighborhood)<br><br>The most iconic viewpoint in Seattle — Space Needle framed against the downtown skyline with Elliott Bay behind.<br><br>5 min walk from street parking. 15 min is plenty for photos. Even better at night with the city lit up.<br><br>Then straight to hotel — you've had a massive day.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">to hotel · check-in · sleep</div><div class="conn-stem"></div></div>
+
+  <!-- ── MONDAY ── -->
+  <div class="day-sep"><div class="day-sep-line"></div><div class="day-sep-label">Mon · Apr 20 — Seattle City + Waterfront + Neighborhoods</div><div class="day-sep-line"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-highlight">
+      <div class="node-icon">🐟</div>
+      <div class="node-title">Pike Place Market</div>
+      <div class="node-time">9:00 – 11:00 AM</div>
+      <div class="node-sub">Fish throwing · Gum Wall · Hidden lower levels · OG Starbucks · Starbucks Reserve Roastery</div>
+      <div class="node-badges">
+        <span class="badge badge-open">✅ Full 2-hr morning block</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Pike Place Market</strong><br>85 Pike St, Seattle WA (Downtown)<br><br>Explore in order:<br>1. Grab breakfast/coffee at a market stall<br>2. Fish throwing at Pike Place Fish Co.<br>3. Original Starbucks (1912 Pike Pl) — quick peek, skip if line is long<br>4. Post Alley Gum Wall — tourist but fun<br>5. Explore the lower levels (often missed by visitors)<br>6. Walk to Starbucks Reserve Roastery on Capitol Hill (~10 min drive) for a proper sit-down experience<br><br><span class="tip-note">Reserve Roastery: 1124 Pike St — coffee flights, Reserve espresso bar, food.</span></div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">walk/ride to waterfront</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-activity">
+      <div class="node-icon">🚲</div>
+      <div class="node-title">Waterfront Biking Loop</div>
+      <div class="node-time">11:00 AM – 12:30 PM</div>
+      <div class="node-sub">Rent from Lime · Spin · or Ride Bikes Seattle · Relaxed pace · Puget Sound views</div>
+      <div class="node-badges">
+        <span class="badge badge-violet">~1–1.5 hrs total · mostly flat</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Waterfront Biking Loop</strong><br>Rent dockless e-bikes from Lime or Spin near Pike Place.<br><br>Route: Pike Place → Pier 57 → Bell Street Pier → Waterfront Promenade → Olympic Sculpture Park → Turn back<br><br>Optional extension: north toward Myrtle Edwards Park for a longer ride.<br><br>Highlights:<br>• Seattle Great Wheel lit up at Pier 57<br>• Puget Sound + Olympic Mountains views<br>• Olympic Sculpture Park (free, walk around)<br><br><span class="tip-note">Washington State Ferry round trip: add 45–60 min if interested in crossing to Bainbridge Island.</span></div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">5–7 min drive · Seattle Center</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-highlight">
+      <div class="node-icon">🛸</div>
+      <div class="node-title">Space Needle + Seattle Center</div>
+      <div class="node-time">12:45 – 2:00 PM</div>
+      <div class="node-sub">Observation deck · 360° city views · Optional: Chihuly Garden and Glass (45–60 min)</div>
+      <div class="node-badges">
+        <span class="badge badge-open">✅ Book tickets online to skip line</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Space Needle</strong><br>400 Broad St, Seattle WA<br><br>Buy tickets online in advance to skip the line.<br>Observation deck: 360° views of city, Mount Rainier, Puget Sound, Olympics.<br><br>Next door: Chihuly Garden and Glass — stunning Dale Chihuly glass sculpture garden + greenhouse. Budget 45–60 min if interested.<br><br>Quick walk around Seattle Center grounds after — free and scenic.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">10 min drive</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-activity">
+      <div class="node-icon">🧌</div>
+      <div class="node-title">Fremont Neighborhood + Fremont Troll</div>
+      <div class="node-time">2:15 – 3:30 PM</div>
+      <div class="node-sub">Fremont Troll under Aurora Bridge · Walk the canal · Quirky shops and cafés</div>
+      <div class="node-badges">
+        <span class="badge badge-violet">Quirky Seattle</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Fremont Neighborhood</strong><br>Fremont Ave N, Seattle WA<br><br>Self-proclaimed "Center of the Universe" — Seattle's most eclectic neighborhood.<br><br>Must-see: Fremont Troll sculpture under the Aurora Bridge (N 36th St)<br>Also: Fremont Rocket, Lenin Statue, Ship Canal walk, coffee shops and vintage stores.<br><br>Laid-back vibes, good for afternoon wandering.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">5–10 min drive</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-activity">
+      <div class="node-icon">🏭</div>
+      <div class="node-title">Gas Works Park</div>
+      <div class="node-time">4:00 – 5:15 PM</div>
+      <div class="node-sub">Historic gasification plant · Lake Union · Best city skyline view across the water</div>
+      <div class="node-badges">
+        <span class="badge badge-violet">Free · Iconic Seattle view</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Gas Works Park</strong><br>2101 N Northlake Way, Seattle WA<br><br>A former coal gasification plant turned into one of the most unique parks in the US.<br><br>Walk up the hill for one of the best views of the Seattle skyline across Lake Union with houseboats and floatplanes below.<br><br>Seaplane takeoffs and landings visible from the park — very Pacific Northwest.<br>Walk or explore lightly inside the park.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">15–20 min drive</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-highlight">
+      <div class="node-icon">🌲</div>
+      <div class="node-title">Discovery Park</div>
+      <div class="node-time">5:45 – 7:15 PM</div>
+      <div class="node-sub">West Point Lighthouse · Beach walk · Coastal forest · True Pacific Northwest feel</div>
+      <div class="node-badges">
+        <span class="badge badge-open">✅ 534 acres · Best nature park in Seattle</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Discovery Park</strong><br>3801 Discovery Park Blvd, Seattle WA<br><br>Seattle's largest park — former military base turned wild coastal sanctuary.<br><br>Walk to West Point Lighthouse: ~1.5 mi round trip (30–40 min)<br>Beach access at the lighthouse. Puget Sound + Olympic Mountains views.<br><br>Coastal old-growth forest trails make this feel far from the city. True Pacific Northwest nature experience without leaving Seattle.<br><br><span class="tip-note">Sunset from the bluff trail can be exceptional on clear April evenings.</span></div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">return to hotel · dinner nearby</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-meal">
+      <div class="node-icon">🍽️</div>
+      <div class="node-title">Dinner</div>
+      <div class="node-time">7:30 – 8:00 PM</div>
+      <div class="node-sub">Belltown or Capitol Hill for evening scene · Or walk from hotel</div>
+      <div class="node-badges">
+        <span class="badge badge-info">Belltown · Capitol Hill · South Lake Union</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Monday Dinner Options</strong><br>• Belltown: Serious Pie (pizza), Taylor Shellfish Oyster Bar, El Gaucho<br>• Capitol Hill: Altura (Italian), Stateside (Southeast Asian), Rachel's Ginger Beer<br>• South Lake Union: Facing East (Taiwanese), Din Tai Fung (familiar!)<br><br>Pick based on proximity to hotel and energy level.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">optional evening</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-optional">
+      <div class="node-icon">🌙</div>
+      <div class="node-title">Optional: Evening Waterfront Bike Ride</div>
+      <div class="node-time">8:15 – 8:45 PM</div>
+      <div class="node-sub">~2–3 miles · Mostly flat · City lights on Puget Sound · Great Wheel lit up</div>
+      <div class="node-badges">
+        <span class="badge badge-optional">Optional — only if energy is good</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Optional Evening Bike Ride</strong><br>Route: Hotel (Downtown/Belltown) → Alaskan Way → Waterfront Promenade → Great Wheel → back<br><br>Views: City lights reflecting on Puget Sound. Great Wheel lit up at night.<br>Optional: Short climb toward Queen Anne Hill for a different skyline angle than Kerry Park.<br><br>Use e-bikes — mostly flat, easy pace. Bring a jacket (April nights: 45–50°F).<br><br><span class="tip-note">~2–3 miles total. Relaxed vibes and photos.</span></div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">rest early · big day tomorrow</div><div class="conn-stem"></div></div>
+
+  <!-- ── TUESDAY ── -->
+  <div class="day-sep"><div class="day-sep-line"></div><div class="day-sep-label">Tue · Apr 21 — Snoqualmie + Mount Rainier + Airport</div><div class="day-sep-line"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-meal">
+      <div class="node-icon">☕</div>
+      <div class="node-title">Breakfast in Seattle</div>
+      <div class="node-time">7:30 – 8:30 AM</div>
+      <div class="node-sub">Close to hotel · Fast but good · Minimize early traffic stress</div>
+      <div class="node-badges">
+        <span class="badge badge-info">Tilikum Place Café · The 5 Point Café · Storyville Coffee</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Tuesday Breakfast Options</strong><br>• Tilikum Place Café — Dutch pancakes, cozy, great coffee (Belltown)<br>• The 5 Point Café — classic Seattle diner, open early, fun atmosphere<br>• Storyville Coffee — light breakfast + exceptional single-origin coffee<br><br>Pick something close to your hotel to avoid early traffic stress. Leave by 8:30 AM.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">depart · 45 min drive · I-90 E → WA-18</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-drive">
+      <div class="node-icon">🚗</div>
+      <div class="node-title">Depart Seattle → Snoqualmie Falls</div>
+      <div class="node-time">8:30 AM</div>
+      <div class="node-sub">~45 min drive · I-90 E toward North Bend</div>
+    </div>
+    <div class="tip"><strong>Drive to Snoqualmie</strong><br>I-90 E from Seattle. Exit toward Snoqualmie. ~28 miles, 45 min.<br>Scenic pass through Issaquah and the Cascade foothills.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">45 min</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-highlight">
+      <div class="node-icon">🌊</div>
+      <div class="node-title">Snoqualmie Falls</div>
+      <div class="node-time">9:15 – 10:00 AM</div>
+      <div class="node-sub">268-ft waterfall · Main deck (2–3 min walk) · Optional lower trail (15 min each way) · Leave by 10 AM</div>
+      <div class="node-badges">
+        <span class="badge badge-open">✅ Free · Parking available</span>
+        <span class="badge badge-warn">⏱ Leave by 10:00 AM sharp</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Snoqualmie Falls</strong><br>6820 Railroad Ave SE, Snoqualmie WA<br><br>268-ft waterfall on the Snoqualmie River. Very accessible — main observation deck is 2–3 min walk from parking.<br><br>Optional: lower trail to the base (15 min each way, steeper). Go only if you have extra time.<br><br>Famous from Twin Peaks TV series. The Salish Lodge sits at the top.<br><br><span class="tip-warn">⚠ Leave by 10:00 AM to stay on schedule for Mount Rainier.</span></div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">1h 45m drive · WA-410 S through Enumclaw</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-drive">
+      <div class="node-icon">🚗</div>
+      <div class="node-title">Drive to Mount Rainier — Paradise Area</div>
+      <div class="node-time">10:00 AM – 11:45 AM · Scenic route</div>
+      <div class="node-sub">WA-410 S through Enumclaw and Greenwater · Small towns + forest + mountain views</div>
+    </div>
+    <div class="tip"><strong>Drive to Rainier — Paradise</strong><br>Route: Snoqualmie → I-90 W → WA-18 → Auburn → WA-164 → Enumclaw → WA-410 S → Mount Rainier Paradise<br><br>Scenic drive through Cascade foothills. Stop in Enumclaw if you need coffee or a quick rest.<br><br>Paradise area entrance: via the Nisqually Entrance (SW corner). ~$30 NPS fee per vehicle (or America the Beautiful pass).</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">arrive Paradise area</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-golden">
+      <div class="node-icon">🏔️</div>
+      <div class="node-title">Mount Rainier — Paradise Area</div>
+      <div class="node-time">11:45 AM – 3:15 PM</div>
+      <div class="node-sub">Paradise Visitor Center · Myrtle Falls · Reflection Lake · Optional: Nisqually Vista Trail</div>
+      <div class="node-badges">
+        <span class="badge badge-fixed">⭐ Rainier close-up — 14,411 ft</span>
+        <span class="badge badge-warn">⏱ Leave by 3:15 PM for airport</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Mount Rainier — Paradise</strong><br>Paradise, Mount Rainier National Park, WA<br><br>High-value stops (short walks, easy access):<br>• <strong>Paradise Visitor Center</strong> — views, exhibits, bathrooms<br>• <strong>Myrtle Falls</strong> — iconic waterfall + mountain backdrop (~10 min walk, easy)<br>• <strong>Reflection Lake</strong> — 5–10 min stop for the perfect mountain mirror photo<br>• <strong>Nisqually Vista Trail</strong> — easy 1 hr loop with glacier views (optional)<br><br>Lunch: Pack picnic or eat at the Rainier lodge café.<br><br><span class="tip-warn">⚠ Leave by 3:15 PM sharp — ~2h 15m to airport needed.</span></div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">2h 15m drive · WA-7 N → I-5 N → SeaTac</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-drive">
+      <div class="node-icon">🚗</div>
+      <div class="node-title">Drive to Seattle-Tacoma Airport (SeaTac)</div>
+      <div class="node-time">3:15 – 5:30 PM</div>
+      <div class="node-sub">~2h 15m · Optional quick restroom / coffee stop en route · Arrive by 5:45–6:00 PM</div>
+      <div class="node-badges">
+        <span class="badge badge-warn">⚠ Leave Rainier at 3:15 PM — no flexibility</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Drive to SeaTac</strong><br>Route: Paradise → WA-7 N → Elbe → Morton → I-5 N → SeaTac<br>~85 mi, 2h 15m<br><br>Traffic can build on I-5 through Tacoma and Federal Way in the afternoon — leave Rainier on time.<br><br>Quick stop at a gas station near Puyallup or Tacoma if needed.<br>Return rental car before checking in to allow extra time.</div>
+  </div>
+
+  <div class="connector"><div class="conn-stem"></div><div class="conn-tag">arrive airport · stress-free buffer</div><div class="conn-stem"></div></div>
+
+  <div class="tt">
+    <div class="node-card node-hotel">
+      <div class="node-icon">✈️</div>
+      <div class="node-title">SeaTac Airport — Relax + Flight</div>
+      <div class="node-time">6:00 – 7:30 PM · Buffer · Flight: 9:30 PM</div>
+      <div class="node-sub">Return rental · Dinner or snacks in terminal · Check-in · Security · Relax</div>
+      <div class="node-badges">
+        <span class="badge badge-open">✅ Totally stress-free</span>
+        <span class="badge badge-sky">9:30 PM departure</span>
+      </div>
+    </div>
+    <div class="tip"><strong>Seattle-Tacoma International Airport (SEA)</strong><br>SeaTac, WA<br><br>Timeline:<br>• 5:45–6:00 PM — Arrive, return rental car<br>• 6:00–6:30 PM — Check in (if not already done)<br>• 6:30–7:30 PM — Security, walk to gate, grab dinner<br>• 7:30+ PM — Gate area, relax, debrief the trip<br>• 9:30 PM — Departure<br><br>Plenty of dining options in the main terminal and satellite concourses. Total stress-free buffer with 3+ hrs before flight.</div>
+  </div>
+
+</div><!-- /timeline-wrap -->
+
+<!-- SUMMARY TABLE -->
+<div class="summary-card">
+  <div class="summary-inner">
+    <h2>Trip Overview</h2>
+    <table class="sum-table">
+      <thead>
+        <tr><th>Day</th><th>Key Details</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Fri Apr 17</td>
+          <td>Arrive Portland · Freshen up · Din Tai Fung dinner 🥢 · Powell's Books · Rest</td>
+        </tr>
+        <tr>
+          <td>Sat Apr 18</td>
+          <td>PSU Farmers Market 8:30 AM · Rose Garden 10:35 AM · Multnomah Falls 12:30 PM · Horsetail Falls 1:25 PM · Optional: Silver Falls · 🌷 Wooden Shoe Tulip Farm 5–7:30 PM (golden hour!) · Optional evening walk</td>
+        </tr>
+        <tr>
+          <td>Sun Apr 19</td>
+          <td>Mount Hood 9:30 AM · Cannon Beach 1:30 PM · Portland rest 5 PM · Drive to Seattle 7 PM · Kerry Park 10 PM nighttime stop</td>
+        </tr>
+        <tr>
+          <td>Mon Apr 20</td>
+          <td>Pike Place Market 9 AM · Starbucks Reserve Roastery · Waterfront Biking 11 AM · Space Needle 12:45 PM · Fremont Troll 2:15 PM · Gas Works Park 4 PM · Discovery Park 5:45 PM · Dinner &amp; optional bike ride</td>
+        </tr>
+        <tr>
+          <td>Tue Apr 21</td>
+          <td>Breakfast 7:30 AM · Snoqualmie Falls 9:15 AM · Mount Rainier Paradise 11:45 AM–3:15 PM · SeaTac 6 PM · ✈️ Flight 9:30 PM</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="sum-note">
+      <strong>🌷 Saturday anchor:</strong> Wooden Shoe Tulip Farm 5–7:30 PM — protect this window. Golden hour is the highlight of the trip.<br>
+      <strong>⚠ Saturday choice:</strong> Silver Falls adds ~2.5–3 hrs. Only go if energy is high after Horsetail Falls.<br>
+      <strong>⏱ Tuesday hard deadline:</strong> Leave Mount Rainier by <strong>3:15 PM sharp</strong> for 9:30 PM flight.<br>
+      <strong>🏔️ Sunday = big mileage day:</strong> ~405 mi total driving. Pace yourself.
+    </div>
+  </div>
+</div>
+
+</body>
+</html>

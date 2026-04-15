@@ -8,31 +8,85 @@
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: #0d1117; color: #e6edf3; max-width: 600px; margin: 80px auto; padding: 0 24px; }
   h1 { font-size: 1.8rem; margin-bottom: 8px; }
   p { color: #8b949e; margin-bottom: 40px; font-size: 0.9rem; }
-  a { display: block; padding: 16px 20px; background: #161b22; border: 1px solid #30363d; border-radius: 8px; color: #58a6ff; text-decoration: none; margin-bottom: 12px; font-size: 0.95rem; transition: border-color 0.2s; }
-  a:hover { border-color: #58a6ff; }
+  a.trip { display: block; padding: 16px 20px; background: #161b22; border: 1px solid #30363d; border-radius: 8px; color: #58a6ff; text-decoration: none; margin-bottom: 12px; font-size: 0.95rem; transition: border-color 0.2s; }
+  a.trip:hover { border-color: #58a6ff; }
   .sub { font-size: 0.75rem; color: #8b949e; margin-top: 4px; }
+
+  .archive-toggle {
+    display: flex; align-items: center; gap: 8px; margin-top: 32px; margin-bottom: 12px;
+    cursor: pointer; user-select: none; width: fit-content;
+  }
+  .archive-toggle:hover .archive-label { color: #8b949e; }
+  .archive-label {
+    font-size: 0.72rem; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+    color: #555970; transition: color 0.2s;
+  }
+  .archive-line { flex: 1; height: 1px; background: #21262d; width: 100px; }
+  .archive-chevron {
+    font-size: 0.65rem; color: #555970; transition: transform 0.25s ease, color 0.2s;
+  }
+  .archive-toggle.open .archive-chevron { transform: rotate(180deg); color: #8b949e; }
+  .archive-toggle.open .archive-label { color: #8b949e; }
+
+  .archive-list { display: none; }
+  .archive-list.open { display: block; }
+
+  .archive-badge {
+    display: inline-block; font-size: 0.6rem; font-weight: 700; letter-spacing: 0.06em;
+    text-transform: uppercase; padding: 2px 7px; border-radius: 4px;
+    background: rgba(139,148,158,0.1); color: #555970; border: 1px solid #21262d;
+    margin-bottom: 6px;
+  }
+  a.trip.archived { opacity: 0.6; border-color: #21262d; }
+  a.trip.archived:hover { opacity: 1; border-color: #8b949e; }
 </style>
 </head>
 <body>
   <h1>✈️ USA Plans</h1>
   <p>Trip itineraries and route planners</p>
 
-  <a href="TYS-IAH/itinerary_viz.html">
+  <a class="trip" href="PDX-SEA/itinerary_viz.html">
+    Portland → Seattle Road Trip — Itinerary
+    <div class="sub">Apr 17–21, 2026 · Waterfalls · Tulips · Mountains · Coast · City</div>
+  </a>
+
+  <a class="trip" href="TYS-IAH/itinerary_viz.html">
     TYS → Houston — Road Trip Itinerary
     <div class="sub">Apr 15–17, 2026 · Smokies · Birmingham · Meridian · Baton Rouge · Houston</div>
   </a>
 
-  <a href="LFT-DAL-LFT/itinerary_viz_final.html">
-    LFT ↔ Dallas — Final Itinerary
-    <div class="sub">Mar 13–15, 2026 · Plan A finalized</div>
-  </a>
-  <a href="LFT-DAL-LFT/itinerary_viz_hou_fri_vs_sun.html">
-    LFT ↔ Dallas — Houston Friday vs Sunday
-    <div class="sub">Plan A vs Plan B comparison</div>
-  </a>
-  <a href="LFT-DAL-LFT/itinerary_viz.html">
-    LFT ↔ Dallas — Route Planner (v1)
-    <div class="sub">Initial route planner</div>
-  </a>
+  <!-- ARCHIVED -->
+  <div class="archive-toggle" id="archiveToggle" onclick="toggleArchive()">
+    <span class="archive-label">Archived · 3 plans</span>
+    <div class="archive-line"></div>
+    <span class="archive-chevron">▼</span>
+  </div>
+
+  <div class="archive-list" id="archiveList">
+    <a class="trip archived" href="LFT-DAL-LFT/itinerary_viz_final.html">
+      <span class="archive-badge">Archived · Mar 2026</span>
+      LFT ↔ Dallas — Final Itinerary
+      <div class="sub">Mar 13–15, 2026 · Plan A finalized</div>
+    </a>
+    <a class="trip archived" href="LFT-DAL-LFT/itinerary_viz_hou_fri_vs_sun.html">
+      <span class="archive-badge">Archived · Mar 2026</span>
+      LFT ↔ Dallas — Houston Friday vs Sunday
+      <div class="sub">Plan A vs Plan B comparison</div>
+    </a>
+    <a class="trip archived" href="LFT-DAL-LFT/itinerary_viz.html">
+      <span class="archive-badge">Archived · Mar 2026</span>
+      LFT ↔ Dallas — Route Planner (v1)
+      <div class="sub">Initial route planner</div>
+    </a>
+  </div>
+
+  <script>
+    function toggleArchive() {
+      const toggle = document.getElementById('archiveToggle');
+      const list = document.getElementById('archiveList');
+      toggle.classList.toggle('open');
+      list.classList.toggle('open');
+    }
+  </script>
 </body>
 </html>
